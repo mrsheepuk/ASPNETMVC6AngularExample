@@ -1,6 +1,6 @@
 {
 	"name": "ASP.NET",
-	"private": true,
+  "private": true,
   "dependencies": {
     "angular": "~1.5.0",
     "angular-ui-router": "~0.2.15"

@@ -210,3 +210,12 @@ FakesAssemblies/
 GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
+
+# Project-specific exclusions
+
+# Bower packages
+wwwroot/lib/
+# Minified JS - created by gulp task
+wwwroot/js/*.min.js
+# Minified CSS - created by gulp task
+wwwroot/css/*.min.css
