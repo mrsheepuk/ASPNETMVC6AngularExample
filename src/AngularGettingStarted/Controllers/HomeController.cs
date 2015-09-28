@@ -13,7 +13,7 @@ namespace AngularGettingStarted.Controllers
         // GET: /<controller>/
         public IActionResult Index()
         {
-            return View();
+            return View("Index");
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿/// <binding BeforeBuild='min' Clean='clean' />
+﻿/// <binding BeforeBuild='inject' Clean='clean' />
 
 var gulp = require("gulp"),
     rimraf = require("rimraf"),
