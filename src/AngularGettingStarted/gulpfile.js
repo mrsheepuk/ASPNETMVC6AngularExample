@@ -94,11 +94,3 @@ gulp.task("inject", ["min"], function () {
         .pipe(inject(minSources, { name: "min", ignorePath: project.webroot }))
         .pipe(gulp.dest("."));
 });
-/*
-gulp.task("inject:appJs", function () {
-    // Our sorted angular JS
-    gulp.src(paths.htmlInject, { base: "." })
-        .pipe(inject(sources, { name: "app" }))
-        .pipe(gulp.dest("."));
-});
-*/
