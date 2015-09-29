@@ -23,15 +23,38 @@
         </header>
 
         <section id="downloads" class="clearfix">
-          <a href="https://github.com/mrsheepuk/ASPNETMVC6AngularExample/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
-          <a href="https://github.com/mrsheepuk/ASPNETMVC6AngularExample/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
           <a href="https://github.com/mrsheepuk/ASPNETMVC6AngularExample" id="view-on-github" class="button"><span>View on GitHub</span></a>
         </section>
 
         <hr>
 
         <section id="main_content">
-          <p>This is a simple tutorial to show how to create an Angular single page application against an ASP.NET 5 / MVC 6 Web API back end.</p>
+          <p>This is a simple, opinionated, tutorial to show how to create an Angular (v1.5) single page application against an
+             ASP.NET 5 / MVC 6 Web API back end.</p>
+          
+          <h2>Pre-requisites</h2>
+          <p>Visual Studio 2015 should be installed, and Git, Bower, NPM and NuGet need to work (so any proxy 
+            settings should be set correctly before starting).</p>
+          
+          <p>Familiarity with Visual Studio is assumed.</p>
+            
+          <h2>Opening the solution</h2>
+          <p>The solution is hosted on GitHub, with different branches representing the different stages of completion of the tutorial. To get started, 
+            follow these instructions to clone the repository and check out the right branch to get started.</p>
+          <ol>
+            <li>Open Visual Studio 2015 and ensure Git is set as the current Source Control Provider (in Tools - Options - Source Control)</li>
+            <li>Select "Open from source control" at the left, then on the right, select "Clone" under "Local Git Repositories"</li>
+            <li>Enter the URL <strong>https://github.com/mrsheepuk/ASPNETMVC6AngularExample.git</strong> and choose a local working folder to place it in.</li>
+            <li>Double-click the newly-created entry in your local repositories list then double-click "Branches".</li>
+            <li>Open "remotes/origin", right-click <strong>Stage01-EmptyProject</strong> and choose "Checkout".</li>
+            <li>Hit the "Back" arrow (top left of the Team Explorer pane) then double-click the solution file in the "Solutions" section.</li>
+            <li>Check that the NPM, NuGet and Bower package restores all work OK - if it is all working correctly, you should be able to
+              switch to the solution explorer and run a debug on the AngularGettingStarted project - this should fire up a web browser with
+              a "Hello World" page.</li> 
+           </ol>
+           
+           <h2>Ready to start!</h2>
+           <p>Onwards to <a href="part01">Part 1</a></p>
         </section>
 
         <footer>
