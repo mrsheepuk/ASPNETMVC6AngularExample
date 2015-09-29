@@ -66,12 +66,10 @@
           you'll find the Angular code in wwwroot/js/src/ - at this time, you should only have app.js and routes.js in there. Open 
           app.js, and you'll see the following:</p>
           
-          <pre>
-             (function () {
-               'use strict';
-               angular.module("app", ['ui.router']);
-             })();
-          </pre>
+          <pre>(function () {
+  'use strict';
+  angular.module("app", ['ui.router']);
+})();</pre>
           
           <p>All this does is create a new Angular module named "app", and declare that it depends on the "ui.router" module (which
             we'll talk about later).</p>
@@ -80,13 +78,11 @@
           <p>To have a page, we need to set up a route. We don't have any routes defined, so open up routes.js and add a route in
             where the comment indicates - we'll talk about routing much more later, so you can just paste this in for now:</p>
             
-          <pre>
-            $stateProvider.state('home', {
-              url: '/',                             // URL to match
-              templateUrl: 'js/src/home/home.html', // Template to use
-              controller: 'Home as home'            // Controller ("Home") and its alias for referencing it inside the template ("home") 
-            });
-          </pre>
+          <pre>$stateProvider.state('home', {
+  url: '/',                             // URL to match
+  templateUrl: 'js/src/home/home.html', // Template to use
+  controller: 'Home as home'            // Controller ("Home") and its alias for referencing it inside the template ("home") 
+});</pre>
             
           <h3>Add your template and controller files</h3>
           <p>Create a folder named "home" under the wwwroot/js/src/ folder, and create an HTML file called home.html and a Javascript file
@@ -95,55 +91,49 @@
           <p>In your home.html, delete ALL of the content (this is a template so we don't want all the HTML headers etc), and put some simple
             HTML like the following:</p>
           
-          <pre>
-            &lt;p&gt;Hello! Welcome to Angular!&lt;/p&gt;
-          </pre> 
+          <pre>&lt;p&gt;Hello! Welcome to Angular!&lt;/p&gt;</pre> 
            
           <p>Now, in your Home.controller.js, you need to create your controller. Here is the boilerplate for an empty controller I
             like to start with, so paste this in then we'll go from there - have a read of the comments to get a feel for what's
             going on here:</p>
             
-          <pre>
-            (function () {
-              'use strict';
-              // Registers this controller with the Angular module "app"
-              angular.module('app').controller('Home',Home);
-            
-              // Inject the services and data this controller depends on - this is how we wire 
-              // services to controllers.
-              Home.$inject = [];
-            
-              // Define the controller - the parameters passed into this function will be 
-              // auto-provided by angular based on the $inject line above.
-              function Home() {
-                var vm = this;
-                // "Public" properties
-            
-                // "Public" functions
-            
-                // "Private" properties
-            
-                // Initialisation
-            
-                // "Public" function definitions
-            
-                // "Private" function definitions
-            
-                // Event Subscriptions
-              }
-            })();
-          </pre> 
+          <pre>(function () {
+  'use strict';
+  // Registers this controller with the Angular module "app"
+  angular.module('app').controller('Home',Home);
+
+  // Inject the services and data this controller depends on - this is how we wire 
+  // services to controllers.
+  Home.$inject = [];
+
+  // Define the controller - the parameters passed into this function will be 
+  // auto-provided by angular based on the $inject line above.
+  function Home() {
+    var vm = this;
+    // "Public" properties
+
+    // "Public" functions
+
+    // "Private" properties
+
+    // Initialisation
+
+    // "Public" function definitions
+
+    // "Private" function definitions
+
+    // Event Subscriptions
+  }
+})();</pre> 
            
           <p>This doesn't actually do anything at all yet, it's just an empty controller! However, it's good for things to
             run, so let's finish wiring things up and debug this up to see it running. The last thing that needs to be done
             to get this to run is to add the declarations to the ASP.NET MVC view to bootstrap our Angular app. To do that
             open up Views/Home/Index.cshtml and change the main &gt;div&lt; as follows:</p>
             
-          <pre>
-            &lt;div ng-app=&quot;app&quot;&gt;
-              &lt;ui-view&gt;&lt;/ui-view&gt;
-            &lt;/div&gt;
-          </pre>
+          <pre>&lt;div ng-app=&quot;app&quot;&gt;
+  &lt;ui-view&gt;&lt;/ui-view&gt;
+&lt;/div&gt;</pre>
 
           <p>Now, debug your application and check that when the web browser opens, you see the HTML you put into your 
             home.html template instead of the Hello World message.</p>
@@ -153,18 +143,14 @@
             array of strings to the controller. In Home.controller.js, add a public property named "list" and define
             a few strings in an array, something like this:</p>
             
-          <pre>
-            vm.list = ["Example String 1", "A second Thing!"];
-          </pre>
+          <pre>vm.list = ["Example String 1", "A second Thing!"];</pre>
           
           <p>Now, in your template, let's wire something to that. Add an "unordered list" (&gt;ul&lt;) with a list 
             item inside (&gt;li&lt;), then on that list item, add the "ng-repeat" directive:</p>
             
-          <pre>
-            &lt;ul&gt;
-              &lt;li ng-repeat=&quot;item in home.list&quot;&gt;{{item}}&lt;/li&gt;
-             &lt;ul&gt;
-          </pre>
+          <pre>&lt;ul&gt;
+  &lt;li ng-repeat=&quot;item in home.list&quot;&gt;{{item}}&lt;/li&gt;
+&lt;ul&gt;</pre>
           
           <p>Here, "home" is the name we gave to our controller in the route definition, "list" is the name of the
             property on our controller, and "item" is an arbitrary name to insert each item in the array into. 
@@ -176,22 +162,18 @@
             with an ng-click attribute - this binds a function on the controller to a click action in the web 
             browser:</p>
             
-          <pre>
-            &lt;a href=&quot;#&quot; ng-click=&quot;home.addItem('horse')&quot;&gt;Add a horse to the list!&lt;/a&gt;
-          </pre>  
+          <pre>&lt;a href=&quot;#&quot; ng-click=&quot;home.addItem('horse')&quot;&gt;Add a horse to the list!&lt;/a&gt;</pre>  
           
           <p>Again, "home" is the alias we've given our controller in the route definition, and "addItem" references
             a function on that controller. Now we need to define that function, which has two parts. First, in the
             "Public functions" section of the controller, add <pre>vm.addItem = addItem;</pre>, then, in the 
             "Public function definitions" section, add the following function definition:</p>
             
-          <pre>
-            function addItem(itemToAdd) {
-              // Add the length of the array to the end of the string - Angular de-duplicates the
-              // array when displaying so we'll only see one entry if we keep adding the same value.
-              vm.list.push(itemToAdd + (vm.list.length + 1));
-            }
-          </pre>
+          <pre>function addItem(itemToAdd) {
+  // Add the length of the array to the end of the string - Angular de-duplicates the
+  // array when displaying so we'll only see one entry if we keep adding the same value.
+  vm.list.push(itemToAdd + (vm.list.length + 1));
+}</pre>
             
           <p>Run up your site again, and now each time you click on the "Add a horse" link, you should see an extra
             horse appear by magic in the list!</p>      
