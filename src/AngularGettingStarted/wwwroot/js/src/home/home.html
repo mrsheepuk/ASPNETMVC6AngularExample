@@ -4,4 +4,5 @@
     <li ng-repeat="item in home.list">{{item}}</li>
 </ul>
 
-<a href="#" ng-click="home.addItem('horse')">Add a horse to the list!</a>
+<input type="text" ng-model="home.newItem" />
+<a href="#" ng-click="home.addItem()">Add!</a>
