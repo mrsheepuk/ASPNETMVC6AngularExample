@@ -12,6 +12,7 @@
     function Home() {
         var vm = this;
         // "Public" properties
+        vm.list = ["Example String 1", "A second Thing!"];
 
         // "Public" functions
 
