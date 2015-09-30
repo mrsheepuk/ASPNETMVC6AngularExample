@@ -19,7 +19,7 @@
 
         <header>
           <h1>ASP.NET MVC6 Angular Tutorial</h1>
-          <h2>Basic ASP.NET vNext MVC6 Angular tutorial with easy gulp tooling.</h2>
+          <h2>Basic ASP.NET 5 MVC6 Angular tutorial with easy gulp tooling.</h2>
         </header>
 
         <section id="downloads" class="clearfix">
@@ -30,84 +30,96 @@
 
         <section id="main_content">
           <h1>Part 1: Angular Basics</h1>
-          
+
           <p>Angular is a Javascript framework for creating web applications - it runs entirely in the web browser, interacting
             with the server through REST API calls. For the purposes of most applications, there are three main types of components
-            which will be heavily used. These components are grouped into what angular terms a "module", and a module will be 
-            associated with an HTML page.</p> 
+            which will be heavily used. These components are grouped into what angular terms a "module", and a module will be
+            associated with an HTML page.</p>
 
           <p>The three major components we'll use in this tutorial are:</p>
-          
+
           <h3>Controllers</h3>
-          <p>A controller, strongly paired with a particular HTML template, is responsible for providing data and 
+          <p>A controller, strongly paired with a particular HTML template, is responsible for providing data and
             functionality to that template. It will interact with <em>services</em> to perform actions. For example, a User Profile
             Controller would receive the user's profile from a service which talks to the server, and provide functions to handle the
             user actions such as saving their updated profile, or changing their password. These functions would all talk to services
-            to do their work, and handle the responses from those service calls to display success or failure messages to the 
+            to do their work, and handle the responses from those service calls to display success or failure messages to the
             user.</p>
 
           <h3>Services</h3>
           <p>A service, implemented as what Angular calls a "factory", provides functionality which is shared across
             the application. Services are where the interaction with the server would be implemented, along with
             other shared functionality like setting page titles, interacting with local storage, and so on.</p>
-            
-          <h3>Directives</h3>
-          <p>A directive, itself comprised of a controller-template pair, is responsible for providing a small re-usable component
-            which can be included into other templates to build up a complex application. Examples range from a simple directive
-            to show the current time, to a complex form for editing a set of options. Whether something is implemented as a
-            directive, or directly in a normal controller/template pair, depends on complexity and whether the component is
-            likely to be re-used in multiple templates. Directives should not, generally, communicate outside themselves, instead
-            providing attributes to allow the templates they are included in to specify the data they will work with - leaving the
-            responsibility for interacting with services to the top-level controllers they're included by.</p>
 
-          <h2>Giving things a go!</h2>
-          
+          <h3>Directives</h3>
+          <p>Directives are responsible for any actions which affect the DOM (in layman's terms, that means anything that
+            creates or updates the actual HTML of the page). In normal usage, we'll use directives in two common ways - using
+            <em>pre-existing directives</em> to provide simple control over the HTML, and making our <em>own directives</em> to
+            provide re-usable components for our application.</p>
+
+          <p>Pre-existing directives allow for such things as repeating a set of elements based on some data (ng-repeat), or
+            selectively showing elements based on a boolean test (ng-if or ng-show), and many other simple tasks. We'll talk about
+            these when we create a template shortly.</p>
+
+          <p>Creating our own directives can be for performing similar tasks where pre-existing directives don't quite suffice, or
+            for creating small re-usable components of our application - like a specific table with a set of functions that we can
+            bind to a specialised piece of data. A directive is created as a controller-template pair, and can be included into
+            normal templates using special attributes or elements in that template. At the complex end, a directive can end up almost
+            as complex as a full page/controller pair - however they should not generally communicate outside themselves, instead
+            providing attributes to allow the templates they are included in to specify the data they will work with - leaving the
+            responsibility for interacting with services (and, by extension, the server) to the top-level controllers they are
+            included by. We'll look at how this is accomplished later in this tutorial.</p>
+
+          <h2>Giving things a go - our first Controller!</h2>
+
           <p>To get started, we need to create a simple application. In the solution opened in <a href="../">the introduction</a>,
-          you'll find the Angular code in wwwroot/js/src/ - at this time, you should only have app.js and routes.js in there. Open 
+          you'll find the Angular code in wwwroot/js/src/ - at this time, you should only have app.js and routes.js in there. Open
           app.js, and you'll see the following:</p>
-          
+
           <pre>(function () {
   'use strict';
   angular.module("app", ['ui.router']);
 })();</pre>
-          
+
           <p>All this does is create a new Angular module named "app", and declare that it depends on the "ui.router" module (which
             we'll talk about later).</p>
-            
+
           <h3>Set up a route</h3>
           <p>To have a page, we need to set up a route. We don't have any routes defined, so open up routes.js and add a route in
             where the comment indicates - we'll talk about routing much more later, so you can just paste this in for now:</p>
-            
+
           <pre>$stateProvider.state('home', {
   url: '/',                             // URL to match
   templateUrl: 'js/src/home/home.html', // Template to use
-  controller: 'Home as home'            // Controller ("Home") and its alias for referencing it inside the template ("home") 
+  controller: 'Home as home'            // Controller ("Home") and its
+                                        // alias for referencing it
+                                        // inside the template ("home")
 });</pre>
-            
+
           <h3>Add your template and controller files</h3>
           <p>Create a folder named "home" under the wwwroot/js/src/ folder, and create an HTML file called home.html and a Javascript file
             named Home.controller.js.</p>
-            
+
           <p>In your home.html, delete ALL of the content (this is a template so we don't want all the HTML headers etc), and put some simple
             HTML like the following:</p>
-          
-          <pre>&lt;p&gt;Hello! Welcome to Angular!&lt;/p&gt;</pre> 
-           
+
+          <pre>&lt;p&gt;Hello! Welcome to Angular!&lt;/p&gt;</pre>
+
           <p>Now, in your Home.controller.js, you need to create your controller. Here is the boilerplate for an empty controller I
             like to start with, so paste this in then we'll go from there - have a read of the comments to get a feel for what's
             going on here:</p>
-            
+
           <pre>(function () {
   'use strict';
   // Registers this controller with the Angular module "app"
   angular.module('app').controller('Home',Home);
 
-  // Inject the services and data this controller depends on - this is how we wire 
-  // services to controllers.
+  // Inject the services and data this controller depends on - this is
+  // how we wire services to controllers.
   Home.$inject = [];
 
-  // Define the controller - the parameters passed into this function will be 
-  // auto-provided by angular based on the $inject line above.
+  // Define the controller - the parameters passed into this function
+  // will be auto-provided by angular based on the $inject line above.
   function Home() {
     var vm = this;
     // "Public" properties
@@ -124,72 +136,129 @@
 
     // Event Subscriptions
   }
-})();</pre> 
-           
+})();</pre>
+
           <p>This doesn't actually do anything at all yet, it's just an empty controller! However, it's good for things to
-            run, so let's finish wiring things up and debug this up to see it running. The last thing that needs to be done
-            to get this to run is to add the declarations to the ASP.NET MVC view to bootstrap our Angular app. To do that
-            open up Views/Home/Index.cshtml and change the main &gt;div&lt; as follows:</p>
-            
+            run, so let's finish wiring things up so we can see it running. The last thing that needs to be done
+            before we can run is to add the declarations to the ASP.NET MVC view to bootstrap our Angular app. To do that
+            open up Views/Home/Index.cshtml and replace the main &gt;div&lt; as follows:</p>
+
           <pre>&lt;div ng-app=&quot;app&quot;&gt;
   &lt;ui-view&gt;&lt;/ui-view&gt;
 &lt;/div&gt;</pre>
 
-          <p>Now, debug your application and check that when the web browser opens, you see the HTML you put into your 
+          <p>The <em>ng-app=&quot;app&quot;</em> tells angular to bootstrap itself using the module 'app' (this is the
+            name we gave our module in app.js), and <em>&lt;ui-view&gt;&lt;/ui-view&gt;</em> tells the router this is
+            where our page templates will go.</p>
+
+          <p>Now, debug your application and check that when the web browser opens, you see the HTML you put into your
             home.html template instead of the Hello World message.</p>
-            
+
           <h3>Doing a bit of data binding!</h3>
-          <p>To demonstrate a bit of data binding, which is how the controller gives data to the template, let's add an 
+          <p>To demonstrate a bit of data binding, which is how the controller gives data to the template, let's add an
             array of strings to the controller. In Home.controller.js, add a public property named "list" and define
             a few strings in an array, something like this:</p>
-            
+
           <pre>vm.list = ["Example String 1", "A second Thing!"];</pre>
-          
-          <p>Now, in your template, let's wire something to that. Add an "unordered list" (&gt;ul&lt;) with a list 
+
+          <p>Now, in your template, let's wire something to that. Add an "unordered list" (&gt;ul&lt;) with a list
             item inside (&gt;li&lt;), then on that list item, add the "ng-repeat" directive:</p>
-            
+
           <pre>&lt;ul&gt;
   &lt;li ng-repeat=&quot;item in home.list&quot;&gt;{{item}}&lt;/li&gt;
 &lt;ul&gt;</pre>
-          
-          <p>Here, "home" is the name we gave to our controller in the route definition, "list" is the name of the
-            property on our controller, and "item" is an arbitrary name to insert each item in the array into. 
-            Angular will duplicate the tag on which ng-repeat is specified (and all tags contained by it) for each
-            item in the array bound to.<p> 
 
-          <p>Run this up, and you should now see a list on your page, repleat with the items you put into your 
+          <p>Here, "home" is the name we gave to our controller in the route definition, "list" is the name of the
+            property on our controller, and "item" is an arbitrary name to insert each item in the array into so we
+            can read it out inside the repeated element. Angular will duplicate the tag on which ng-repeat is
+            specified (and all tags contained by it) for each item in the array bound to, and replace the content in
+            curly braces with the specified variable.<p>
+
+          <p>Run this up, and you should now see a list on your page, repleat with the items you put into your
             controller. Still pretty boring though, so let's make it interactive. In your template, add a link
-            with an ng-click attribute - this binds a function on the controller to a click action in the web 
+            with an ng-click attribute - this binds a function on the controller to a click action in the web
             browser:</p>
-            
-          <pre>&lt;a href=&quot;#&quot; ng-click=&quot;home.addItem('horse')&quot;&gt;Add a horse to the list!&lt;/a&gt;</pre>  
-          
+
+          <pre>&lt;a href=&quot;#&quot; ng-click=&quot;home.addItem('horse')&quot;&gt;Add a
+    horse to the list!&lt;/a&gt;</pre>
+
           <p>Again, "home" is the alias we've given our controller in the route definition, and "addItem" references
             a function on that controller. Now we need to define that function, which has two parts. First, in the
-            "Public functions" section of the controller, add <pre>vm.addItem = addItem;</pre>, then, in the 
-            "Public function definitions" section, add the following function definition:</p>
-            
+            "Public functions" section of the controller, add:</p>
+
+          <pre>vm.addItem = addItem;</pre>
+
+          <p>... then, in the "Public function definitions" section, add the following function definition:</p>
+
           <pre>function addItem(itemToAdd) {
-  // Add the length of the array to the end of the string - Angular de-duplicates the
-  // array when displaying so we'll only see one entry if we keep adding the same value.
+  // Add the length of the array to the end of the string - Angular
+  // de-duplicates thearray when displaying so we'll only see one
+  // entry if we keep adding the same value.
   vm.list.push(itemToAdd + (vm.list.length + 1));
 }</pre>
-            
+
           <p>Run up your site again, and now each time you click on the "Add a horse" link, you should see an extra
-            horse appear by magic in the list!</p>      
-           
-<!--           
+            horse appear by magic in the list! You'll note that we didn't have to do any special wiring to get the
+            view to update after changing our list - Angular watches the data it has been bound to and will
+            automatically update the page whenever things change!</p>
+
+          <p>This works in reverse too, so let's add a text box so we can add things other than horses to our list. In your
+            controller, <strong>add a new public property called newItem</strong>, and set it to "", then update
+            the addItem function as follows:</p>
+
+            <pre>function addItem() {
+    // We don't want to add empty entries - we will change this to
+    // show an error later.
+    if (vm.newItem.length == 0) return;
+
+    // If we're still here, add whatever to the list, then clear
+    // the newItem property.
+    vm.list.push(vm.newItem);
+    vm.newItem = "";
+  }</pre>
+
+          <p>Now, replace the add link in your template with a new text box bound to the newItem property, and a new
+            add link which doesn't pass a parameter any more:</p>
+
+          <pre>&lt;input type="text" ng-model="home.newItem" /&gt;
+&lt;a href=&quot;#&quot; ng-click=&quot;home.addItem()&quot;&gt;Add!&lt;/a&gt;</pre>
+
+          <p>Here, we're using the <em>ng-model</em> directive to bind the value of this text box to the controller
+            property newItem, so now, as the user changes the text in the textbox, the value of that property will be
+            updated - and vice-versa. Run this up, enter an item, and click the Add link to see it in action. If
+            everything is working right, the value should be added, and the textbox should be emptied, each time you
+            click add.</p>
+
+          <p>As a last exercise, add a function on your controller to remove a specific item from the list, and update your
+            template to call this function somehow. As a hint, you can remove a specific item from an array in
+            javascript like this:</p>
+
+          <pre>var exampleArray = ["horse", "sheep", "cow"];
+var itemToRemove = "sheep";
+// Check where the item to remove is located in the array.
+var ind = exampleArray.indexOf(itemToRemove);
+// If we have found the item to remove, splice it out.
+if (ind > -1) exampleArray.splice(ind, 1);
+</pre>
+
+          <p>... and remember that you can include things inside an ng-repeat!</p>
+
+          <p>You can check your solution against
+            <a href="https://github.com/mrsheepuk/ASPNETMVC6AngularExample/tree/Part01Final">this branch</a>
+            which shows a final working solution for all the steps discussed in Part 1.</p>
+
+<!--
           <p>An example controller:</p>
-          
+
           <pre>
             (function () {
               'use strict';
               // Registers this controller with the Angular module "app"
               angular.module('app').controller('Profile',Profile);
-            
+
               // Inject the services and data this controller depends on.
               Profile.$inject = ['userService','authService','pageService','userProfile'];
-            
+
               // Define the controller - the parameters here will be auto-provided by angular based
               // on the $inject line above.
               function Profile(userService, authService, pageService, userProfile) {
@@ -201,35 +270,35 @@
                 vm.edit = false;
                 vm.user = userProfile;  // Bind the passed-in user profile to a public
                                         // property so the template can see it.
-                
-                vm.oldPassword = null;  // These properties will be bound to text boxes 
-                vm.newPassword1 = null; // in the template, and used in the change password 
+
+                vm.oldPassword = null;  // These properties will be bound to text boxes
+                vm.newPassword1 = null; // in the template, and used in the change password
                 vm.newPassword2 = null; // function below.
-                
+
                 vm.passwordChanged = false;  // These will be used in the template to
                 vm.profileSaved = false;     // show messages when actions complete.
-                
-                vm.err = null;          // If something fails, we'll put a message in 
+
+                vm.err = null;          // If something fails, we'll put a message in
                                         // here that the template can display.
-            
-                // "Public" functions - see the actual definitions below. These are 
+
+                // "Public" functions - see the actual definitions below. These are
                 // the functions that our template will call.
 
                 vm.update = update;
                 vm.changePassword = changePassword;
                 vm.doEdit = doEdit;
-            
-                // "Private" properties - javascript doesn't really have "private" 
+
+                // "Private" properties - javascript doesn't really have "private"
                 // properties, so by convention we simply name them with a leading
                 // underscore to indicate the intention for this to be an internal
                 // property rather than for use in the template.
 
                 vm._examplePrivateProperty = "horse";
-            
+
                 // Initialisation - here we do any set up that the controller needs
                 // before the component is displayed.
                 pageService.setTitle('Your Profile - ' + vm.user.username);
-            
+
                 // "Public" function definitions
                 function doEdit() {
                   // When the user presses the edit button, we simply set edit
@@ -237,16 +306,16 @@
                   // show the user the textboxes etc.
                   vm.edit = true;
                 }
-            
+
                 function update() {
-                  // When the user presses the save button, we will submit the 
+                  // When the user presses the save button, we will submit the
                   // updated details to the server via the userService.
-                  
+
                   // Null out any previous errors before starting a new request.
                   vm.err = null;
-                  
-                  // The service returns a "promise" - using .then we can 
-                  // register functions to be called when that save completes 
+
+                  // The service returns a "promise" - using .then we can
+                  // register functions to be called when that save completes
                   // or fails.
                   userService.updateProfile(vm.user).then(
                     // Success callback
@@ -254,23 +323,23 @@
                       vm.err = null;
                       vm.edit = false;
                       // In case the server has updated the user in some way
-                      // after we saved, overwrite our local user with the 
+                      // after we saved, overwrite our local user with the
                       // data the server returned.
                       vm.user = response.user;
                       // Indicate that we have saved the profile.
                       return vm.profileSaved = true;
-                    }, 
+                    },
                     // Failure callback
                     function (err) {
                       vm.err = err.message;
                       return vm.profileSaved = false;
                     }
                   );
-                  
-                  // NOTE: Any code here will be executed BEFORE the callbacks 
-                  // inside the .then above! 
+
+                  // NOTE: Any code here will be executed BEFORE the callbacks
+                  // inside the .then above!
                 }
-            
+
                 function changePassword() {
                   vm.err = false;
                   vm.errMsg = null;
@@ -287,20 +356,20 @@
                     vm.err = "NewPasswordsDidNotMatch";
                   }
                 }
-            
+
                 // "Private" function definitions
-            
+
                 // Event Subscriptions
-            
+
               }
             })();
           </pre>
-          
+
           <p><strong>Services</strong> - a service (implemented as what Angular calls a "factory") provides shared functionality
-            which can be used by all controllers. 
+            which can be used by all controllers.
 -->
           <h2>Ready to continue?</h2>
-          <p>Onwards to <a href="part02">Part 2</a></p>
+          <p>Onwards to <a href="../part02/">Part 2</a></p>
         </section>
 
         <footer>
@@ -308,7 +377,7 @@
           This page was generated by <a href="https://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
         </footer>
 
-        
+
       </div>
     </div>
   </body>
