@@ -17,6 +17,7 @@
 
         // "Public" functions
         vm.addItem = addItem;
+        vm.removeItem = removeItem;
 
         // "Private" properties
 
@@ -32,6 +33,13 @@
             // property.
             vm.list.push(vm.newItem);
             vm.newItem = "";
+        }
+
+        function removeItem(itemToRemove) {
+            // Check where the item to remove is located in the array.
+            var ind = vm.list.indexOf(itemToRemove);
+            // If we have found the item to remove, splice it out.
+            if (ind > -1) vm.list.splice(ind, 1);
         }
 
         // "Private" function definitions

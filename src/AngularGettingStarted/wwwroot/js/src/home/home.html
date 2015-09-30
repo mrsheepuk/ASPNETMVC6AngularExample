@@ -1,7 +1,7 @@
 ﻿<p>Hello! Welcome to Angular!</p>
 
 <ul>
-    <li ng-repeat="item in home.list">{{item}}</li>
+    <li ng-repeat="item in home.list">{{item}} (<a href="#" ng-click="home.removeItem(item)">remove</a>)</li>
 </ul>
 
 <input type="text" ng-model="home.newItem" />
