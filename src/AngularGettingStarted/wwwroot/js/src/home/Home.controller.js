@@ -15,12 +15,18 @@
         vm.list = ["Example String 1", "A second Thing!"];
 
         // "Public" functions
+        vm.addItem = addItem;
 
         // "Private" properties
 
         // Initialisation
 
         // "Public" function definitions
+        function addItem(itemToAdd) {
+            // Add the length of the array to the end of the string - Angular de-duplicates the
+            // array when displaying so we'll only see one entry if we keep adding the same value.
+            vm.list.push(itemToAdd + (vm.list.length + 1));
+        }
 
         // "Private" function definitions
 
