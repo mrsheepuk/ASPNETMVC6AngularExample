@@ -20,6 +20,7 @@
     <!-- endinject -->
     <!-- app:js -->
     <script src="/js/src/app.js"></script>
+    <script src="/js/src/home/Home.controller.js"></script>
     <script src="/js/src/routes.js"></script>
     <!-- endinject -->
 
@@ -38,8 +39,8 @@
     }
 </head>
 <body>
-    <div>
-        Hello World
+    <div ng-app="app">
+        <ui-view></ui-view>
     </div>
 </body>
 </html>
