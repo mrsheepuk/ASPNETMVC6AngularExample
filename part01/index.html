@@ -141,7 +141,7 @@
           <p>This doesn't actually do anything at all yet, it's just an empty controller! However, it's good for things to
             run, so let's finish wiring things up so we can see it running. The last thing that needs to be done
             before we can run is to add the declarations to the ASP.NET MVC view to bootstrap our Angular app. To do that
-            open up Views/Home/Index.cshtml and replace the main &gt;div&lt; as follows:</p>
+            open up Views/Home/Index.cshtml and replace the main &lt;div&gt; as follows:</p>
 
           <pre>&lt;div ng-app=&quot;app&quot;&gt;
   &lt;ui-view&gt;&lt;/ui-view&gt;
@@ -161,8 +161,8 @@
 
           <pre>vm.list = ["Example String 1", "A second Thing!"];</pre>
 
-          <p>Now, in your template, let's wire something to that. Add an "unordered list" (&gt;ul&lt;) with a list
-            item inside (&gt;li&lt;), then on that list item, add the "ng-repeat" directive:</p>
+          <p>Now, in your template, let's wire something to that. Add an "unordered list" (&lt;ul&gt;) with a list
+            item inside (&lt;li&gt;), then on that list item, add the "ng-repeat" directive:</p>
 
           <pre>&lt;ul&gt;
   &lt;li ng-repeat=&quot;item in home.list&quot;&gt;{{item}}&lt;/li&gt;

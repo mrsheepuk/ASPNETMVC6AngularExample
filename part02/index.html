@@ -31,6 +31,113 @@
         <section id="main_content">
           <h1>Part 2: Using Services</h1>
 
+          <p>This continues on from the work done in <a href="../part01/">part 1</a>,
+            if you haven't completed that, it's best to head over there. Alternatively,
+            you can switch to the branch "Part01Final" (Team Explorer - Branches - right
+            click "Part01Final" inside remotes/origin and select "New local branch from..."
+            and give it a local name, tick Checkout branch and untick Track remote branch)
+            to use our version of part 1.</p>
+
+          <h2>Creating a new service</h2>
+          <p>Continuing on with our exciting "list of things" from part 1, now we'd like to
+            load a list of things from the server, send additional items to add to the list back
+            to the server, and ask the server to remove things from the list. At the end of
+            part 1, we had a user interface that could manage this, but all the data was simply
+            local to the user's browser (if you refreshed the page, you'd see that it would reset
+            back to where we started). Let's see how we can get this talking to the server.</p>
+
+          <h3>Create the WebAPI end points</h3>
+          <p>First things first, let's create the server-side API that we'll be talking to. In the
+            top level Controllers folder of the AngularGettingStarted project, add a new Web API
+            Controller class from the Server-side list in the Add new item dialog - call it
+            ThingListController.cs.</p>
+
+          <p>In WebAPI, the attributes present on the classes and methods are used to define the
+            URLs and HTTP methods which will reach those items. Take a look at the code generated
+            when we create a new Web API Controller - here annotated with comments to explain what
+            various features mean:</p>
+
+          <pre>namespace AngularGettingStarted.Controllers
+{
+    // Here, we define the basic URL used to reach all endpoints
+    // inside this class - [controller] represents the name of the
+    // classbefore the word Controller, so in this case:
+    // "api/ThingList" is our base URL.
+    [Route("api/[controller]")]
+    public class ThingListController : Controller
+    {
+        // If an HTTP GET comes in to api/ThingList, this method will
+        // be used to handle it. You can see that it is simply
+        // returning plain .NET objects, and the framework will deal
+        // with marshalling that to JSON to return to the client.
+        [HttpGet]
+        public IEnumerable<string> Get()
+        {
+            return new string[] { "value1", "value2" };
+        }
+
+        // If an HTTP GET comes in to api/ThingList/1234, this method
+        // will handle it - you can see 1234 will be placed into the
+        // id parameter here. In this case, it's simply returning a
+        // hard-coded string.
+        [HttpGet("{id}")]
+        public string Get(int id)
+        {
+            return "value";
+        }
+
+        // If an HTTP POST comes in to api/ThingList, which has the
+        // meaning of "create me a new item within api/ThingList",
+        // this method will handle it.
+        [HttpPost]
+        public void Post([FromBody]string value)
+        {
+        }
+
+        // If an HTTP PUT comes in to api/ThingList/1234, which has
+        // the meaning of "update the item 1234 with what I've sent",
+        // this method will handle it.
+        [HttpPut("{id}")]
+        public void Put(int id, [FromBody]string value)
+        {
+        }
+
+        // If an HTTP DELETE comes in to api/ThingList/1234, which
+        // has the meaning of "remove the item 1234", this method
+        // will handle it.
+        [HttpDelete("{id}")]
+        public void Delete(int id)
+        {
+        }
+    }
+}</pre>
+
+          <p>For our thing-list, we'll define the following three endpoints:</p>
+
+          <table>
+            <tr>
+              <th style="width: 30%; font-weight: bold;">URL</th>
+              <th style="width: 20%; font-weight: bold;">Verb</th>
+              <th style="width: 50%; font-weight: bold;">Meaning</th>
+            </tr>
+            <tr>
+              <td>/api/thinglist</td>
+              <td>GET</td>
+              <td>Return all things in the list</td>
+            </tr>
+            <tr>
+              <td>/api/thinglist</td>
+              <td>POST</td>
+              <td>Add a thing to the list - we'll supply the thing to add in
+                the body of the request.</td>
+            </tr>
+            <tr>
+              <td>/api/thinglist/{thing}</td>
+              <td>DELETE</td>
+              <td>Remove a particular thing from the list</td>
+            </tr>
+          </table>
+
           <h2>Ready to continue?</h2>
           <p>Onwards to <a href="../part03/">Part 3</a></p>
         </section>
