@@ -38,6 +38,152 @@
             and give it a local name, tick Checkout branch and untick Track remote branch)
             to use our version of part 2.</p>
 
+          <h2>Creating our thingList service</h2>
+          
+          <p>In wwwroot/js/src, create a folder named services, and in that, a Javascript 
+            file named thingList.service.js. In that file, paste the following boilerplate
+            starting point for our service (which, by convention, will be named with a 
+            lower-case leading letter to indicate that only a single instance of this
+            will ever exist):</p>
+            
+          <pre>(function () {
+  'use strict';
+  // Register our service on our module.
+  angular.module('app').factory('thingListService', thingListService);
+
+  // Inject the dependencies - we'll use the angular-provided $http 
+  // service to interact with the server. 
+  thingListService.$inject = ['$http']
+
+  // Define our service - note that Angular will ensure that whatever
+  // we've specified in our $inject clause above will get injected as
+  // parameters here, allowing us to use that within our service.
+  function thingListService($http) {
+    // Define the public interface for the service here
+    var service = {
+    };
+
+    // Return the interface.
+    return service;
+
+    // Define the functions referenced by the service interface
+    // above here:
+    
+  }
+})();</pre>
+
+          <p>Here, we've registered a new, empty, service called thingListService with Angular, and declared
+            that it requires the Angular-provided $http service injected into it. Now, let's use that to get
+            our list of things from the server. Update the public interface to include a new function:</p>
+            
+          <pre>var service = {
+  getThings: getThings
+};</pre>
+
+          <p>... then create the getThings function below the "return service;" line:</p>
+          
+          <pre>function getThings() {
+  // $http.get returns a promise - when this promise resolves, we want to
+  // unwrap the data from the response and return that to anything waiting
+  // on this.
+  return $http.get("/api/thinglist").then(function (response) {
+    return response.data;
+  });
+}</pre>
+
+          <p>This basic function has touched on an important concept - a "promise" - so before we continue,
+            we'll have a quick introduction to promises and how they work. We'll get back to our service shortly!</p>
+
+          <h3>A quick word on "Promises"</h3>
+
+          <p>In Javascript, there is only a single thread of execution, therefore anything which might take 
+            some time to complete (such as an HTTP call to a server) can't simply wait around, as that would 
+            lead to the web browser freezing until the call is complete. Therefore, in such circumstances, 
+            callback functions are used - to be executed when an asynchronous action completes.</p>
+            
+          <p>A "promise", such as that returned by $http.get, returns an object which has a function 
+            <strong>.then(fulfilledCallback, [rejectedCallback])</strong> on it - into this function, you can
+            pass one or two callback functions - and the "promise" ensures that one of these (and only one)
+            will be called exactly once at some point in future - called "resolving" the promise.</p>
+            
+            <p>The fulfilledCallback will be executed should the call complete successfully, and passed the result
+            of the operation, and the rejectedCallback (if specified) will be executed should the call fail, 
+            and is passed an error describing the failure.</p> 
+            
+          <p>The .then() function itself returns another promise, allowing .thens to be chained together 
+            one after another, to create a logical sequence of asynchronous operations.</p>
+            
+          <p>In a fulfilledCallback or rejectedCallback, you can return a value or another promise. If you 
+            return a value, any further ".then" callbacks which have been chained onto this one will be 
+            immediately fullfilled with the value you have returned. If you return another 
+            promise, that will itself be waited upon, and once that resolves, any further ".then" callbacks 
+            which have been chained onto this one will be fulfilled (or rejected) with the 
+            result of that promise.</p>
+            
+          <p>To give a quick example to show the power of this, here's an example showing multiple HTTP 
+            calls being chained together (note this is probably not the best way to implement this particular
+            sequence of actions, it's just to show how promises work):</p>
+            
+          <pre>var promise = $http.get("/api/refdata").then(function (refDataResponse) {
+  // For some reason, we're interested in the first horse returned, so
+  // we return another promise here which will resolve with data about
+  // that horse.
+  return $http.get("/api/horses/" + refDataResponse.data.horses[0].id);              
+}).then(function (horseDataResponse) {
+  // Now we've got the data for that first horse, let's create a race
+  // with his name included, and return a promise for creating that 
+  // race.
+  return $http.post("/api/races", 
+    { "horseName": horseDataResponse.data.name });
+}).then(function (raceCreatedResponse) {
+  // This will be resolved once the race has been created, so let's 
+  // return the response to the POST to anyone waiting on this whole
+  // promise chain to complete.
+  return raceCreatedResponse.data;
+}, function (err) {
+  // Errors bubble up along the promise chain, until they find a then 
+  // which has a failureHandler specified - therefore ANY error thrown 
+  // by ANY of the above asynchronous actions will find its way here.
+  // If this doesn't throw an error itself, anything chained onto the 
+  // end of this will be resolved *successfully*, so you need to 
+  // re-throw or fully deal with the error here.
+  console.log("Failed doing our horsey thing - " + err.message);
+  // Re-throw the error.
+  throw err;
+});
+
+// **********
+// NOTE: The next line will be executed BEFORE ANY of the callbacks
+// specified inside the .thens above! Remember it's all asynchronous
+// inside the .then()'s.
+// **********
+console.log("Request sent!");
+
+// Return the promise, so whoever called this can get access to the 
+// result of these promises once they finish resolving.
+return promise;
+</pre>
+
+          <p>We'll be using promises while creating our services, so you can play with them
+            more as we go - they can be confusing at first but once you get your head around
+            them, they become second nature... nearly! :)</p>
+            
+          <p>The "promise" is documented as the <a href="https://promisesaplus.com/" target="_blank">Promises A+ 
+          open standard</a>, and promises will become a native part of Javascript in future versions
+          of the language.</p>
+            
+          <p>Now, back to our new service...</p>
+
+          <h3>Wiring our service to our controller</h3>
+          
+          <p>Now we've got a basic service with one function on it, let's use that from our 
+            controller. Open up Home.controller.js and ensure our new service gets injected
+            by adding it to the $inject array (remembering that you specify the name of the
+            service by a string, which must equal that used when we registered our service
+            with the module), and as a parameter to the top-level controller function.</p>
+            
+          <p>TBC</p>
+
         </section>
 
         <footer>
