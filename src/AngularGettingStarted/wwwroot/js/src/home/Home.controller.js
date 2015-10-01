@@ -5,11 +5,11 @@
 
     // Inject the services and data this controller depends on - this is how we wire 
     // services to controllers.
-    Home.$inject = [];
+    Home.$inject = ["thingList"];
 
     // Define the controller - the parameters passed into this function will be 
     // auto-provided by angular based on the $inject line above.
-    function Home() {
+    function Home(thingList) {
         var vm = this;
         // "Public" properties
         vm.list = ["Example String 1", "A second Thing!"];
