@@ -3,37 +3,31 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Mvc;
+using AngularGettingStarted.Models;
 
 namespace AngularGettingStarted.Controllers
 {
     [Route("api/[controller]")]
     public class ThingListController : Controller
     {
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
+        private static List<string> s_thingList = new List<string>();
 
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpGet]
+        public List<string> Get()
         {
-            return "value";
+            return s_thingList;
         }
 
         [HttpPost]
-        public void Post([FromBody]string value)
+        public void Post([FromBody]Thing thing)
         {
+            s_thingList.Add(thing.Value);
         }
 
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+        [HttpDelete("{thing}")]
+        public void Delete(string thing)
         {
-        }
-
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            s_thingList.Remove(thing);
         }
     }
 }
