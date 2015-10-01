@@ -71,7 +71,7 @@
         // returning plain .NET objects, and the framework will deal
         // with marshalling that to JSON to return to the client.
         [HttpGet]
-        public IEnumerable<string> Get()
+        public IEnumerable&lt;string&gt; Get()
         {
             return new string[] { "value1", "value2" };
         }
@@ -142,10 +142,10 @@
             in a real-world application, we'd likely pass this data off to a database or similar
             to store. So, let's create that and replace the Get() method to return this list:</p>
             
-          <pre>private static List<string> s_thingList = new List<string>();
+          <pre>private static List&lt;string&gt; s_thingList = new List&lt;string&gt;();
 
 [HttpGet]            
-public List<string> Get() 
+public List&lt;string&gt; Get() 
 {
     return s_thingList;
 }</pre>
