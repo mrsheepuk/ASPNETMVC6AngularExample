@@ -13,6 +13,7 @@
     function thingListService($http) {
         // Define the public interface for the service here
         var service = {
+            getThings: getThings
         };
 
         // Return the interface.
@@ -20,6 +21,10 @@
 
         // Define the functions referenced by the service interface
         // above here:
-
+        function getThings() {
+            return $http.get("/api/thinglist").then(function (response) {
+                return response.data;
+            });
+        }
     }
 })();
