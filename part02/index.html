@@ -29,7 +29,7 @@
         <hr>
 
         <section id="main_content">
-          <h1>Part 2: Using Services</h1>
+          <h1>Part 2: Creating a simple Web API</h1>
 
           <p>This continues on from the work done in <a href="../part01/">part 1</a>,
             if you haven't completed that, it's best to head over there. Alternatively,
@@ -38,7 +38,7 @@
             and give it a local name, tick Checkout branch and untick Track remote branch)
             to use our version of part 1.</p>
 
-          <h2>Creating a new service</h2>
+          <h2>Working towards our first Angular service</h2>
           <p>Continuing on with our exciting "list of things" from part 1, now we'd like to
             load a list of things from the server, send additional items to add to the list back
             to the server, and ask the server to remove things from the list. At the end of
@@ -137,9 +137,83 @@
               <td>Remove a particular thing from the list</td>
             </tr>
           </table>
+          
+          <p>For this example, we'll store the values in a static string list in our controller - 
+            in a real-world application, we'd likely pass this data off to a database or similar
+            to store. So, let's create that and replace the Get() method to return this list:</p>
+            
+          <pre>private static List<string> s_thingList = new List<string>();
 
-          <h2>Ready to continue?</h2>
-          <p>Onwards to <a href="../part03/">Part 3</a></p>
+[HttpGet]            
+public List<string> Get() 
+{
+    return s_thingList;
+}</pre>
+
+          <p>Now, let's implement our Post method to handle adding items to the list. In all but 
+            the very simplest of cases, a Post will take an object parameter rather than a raw
+            value, so let's go ahead and create a new class named Thing in the Models folder, 
+            which will simply hold a string value:</p>
+            
+          <pre>public class Thing
+{
+    public string Value { get; set; }
+}</pre>
+
+          <p>And update our Post method to take a Thing parameter and put its value in the 
+            list - the [FromBody] annotation tells the framework to take the body from the
+            post request and attempt to make a Thing out of it:</p>
+            
+          <pre>[HttpPost]
+public void Post([FromBody]Thing thing) 
+{
+    s_thingList.Add(thing.Value);
+}</pre>
+
+          <p>Our API is now ready to run - we'll add the delete implementation shortly, but let's
+            see it running first. To interact with a Web API for testing, it's useful to install the
+            <a href="https://chrome.google.com/webstore/detail/postman/fhbjgbiflinjbdggehcddcbncdddomop?hl=en">Postman 
+            Chrome extension</a> which allows you to hand-craft HTTP requests and see the 
+            responses. Install that, then Debug your project and pop the URL http://localhost:43327/api/thinglist 
+            into Postman, you should see a response of [] - an empty array. <strong>Note that the port number in
+            your instance may well be different</strong> - you can find the port used by your project in the Debug
+            tab of its properties page in Visual Studio.</p> 
+            
+          <p>Let's try posting to our API to create a new entry in our list, so in Postman once more, set the request
+            type to POST instead of GET (to the left of the URL), and in the Body tab, select raw with a type of 
+            "JSON (application/json)", then enter the following - noting that we're making a JSON structure that 
+            looks like the Thing class we defined above:</p>
+          
+          <pre>{ "Value": "sheep" }</pre>
+          
+          <p>Send that in, and you should see an empty response with the response code of 200 - that means the
+            request was successful. To prove that it has actually worked, re-run your original GET and you should
+            now see an entry in the list - [ "sheep" ] - if you ran your post multiple times, you will see 
+            multiple sheep!</p>
+            
+          <p>The last thing to do for now, before we get back into our Angular code, is to create the delete
+            handler. The URL to this will include the item we're deleting, so should look like the following:</p>
+            
+          <pre>[HttpDelete("{thing}")]
+public void Delete(string thing)
+{
+    s_thingList.Remove(thing);
+}</pre>
+
+          <p>Debug that up and check in Postman that, after creating an item using a POST, you can then
+            delete that item using a DELETE and adjusting the URL to include the value you created (e.g. if 
+            you post { "Value": "horse" }, then you should send a DELETE to /api/thinglist/horse).</p>
+            
+          <p>One final note - at the moment we're not checking that whatever has been POSTed is a valid Thing,
+            so if you get the syntax wrong on your POST body, you may end up with null entries on the list. We'll
+            have a look at that in due course.</p> 
+          
+          <p>You can check your solution against
+            <a href="https://github.com/mrsheepuk/ASPNETMVC6AngularExample/tree/Part02Final">this branch</a>
+            which adds the Web API discussed in this page to our application.</p>
+
+          <p>With that, we're ready to get back to Angular, so head to <a href="../part03/">Part 3</a> and we'll
+            create a service to interact with this API.</p>
         </section>
 
         <footer>
