@@ -8,6 +8,7 @@ using AngularGettingStarted.Models;
 namespace AngularGettingStarted.Controllers
 {
     [Route("api/[controller]")]
+    [ResponseCache(NoStore = true)]
     public class ThingListController : Controller
     {
         private static List<string> s_thingList = new List<string>();
