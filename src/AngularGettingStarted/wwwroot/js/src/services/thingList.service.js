@@ -13,7 +13,8 @@
     function thingListService($http) {
         // Define the public interface for the service here
         var service = {
-            getThings: getThings
+            getThings: getThings,
+            addThing: addThing
         };
 
         // Return the interface.
@@ -26,5 +27,11 @@
                 return response.data;
             });
         }
-    }
+
+        function addThing(thing) {
+            return $http.post("/api/thinglist", { "Value": thing }).then(function (response) {
+                return response.data;
+            });
+        }
+}
 })();

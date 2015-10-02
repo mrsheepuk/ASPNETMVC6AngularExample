@@ -14,6 +14,7 @@
         // "Public" properties
         vm.list = [];
         vm.newItem = "";
+        vm.adding = false;
 
         // "Public" functions
         vm.addItem = addItem;
@@ -30,10 +31,15 @@
             // error later.
             if (vm.newItem.length == 0) return;
 
-            // If we're still here, add whatever to the list, then clear the newItem
-            // property.
-            vm.list.push(vm.newItem);
-            vm.newItem = "";
+            vm.adding = true;
+            thingListService.addThing(vm.newItem).then(function (response) {
+                // Thing added, clear the textbox and reload the list.
+                vm.newItem = "";
+                return refreshList();
+            }).then(function () {
+                // Finished refreshing, so finished adding.
+                vm.adding = false;
+            });
         }
 
         function removeItem(itemToRemove) {

@@ -5,4 +5,4 @@
 </ul>
 
 <input type="text" ng-model="home.newItem" />
-<a href="#" ng-click="home.addItem()">Add!</a>
+<a href="#" ng-hide="home.adding" ng-click="home.addItem()">Add!</a> <span ng-show="home.adding">Adding...</span>
