@@ -14,7 +14,8 @@
         // Define the public interface for the service here
         var service = {
             getThings: getThings,
-            addThing: addThing
+            addThing: addThing,
+            removeThing: removeThing
         };
 
         // Return the interface.
@@ -30,6 +31,12 @@
 
         function addThing(thing) {
             return $http.post("/api/thinglist", { "Value": thing }).then(function (response) {
+                return response.data;
+            });
+        }
+
+        function removeThing(thing) {
+            return $http.delete("/api/thinglist/" + thing).then(function (response) {
                 return response.data;
             });
         }

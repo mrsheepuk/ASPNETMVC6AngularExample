@@ -15,6 +15,7 @@
         vm.list = [];
         vm.newItem = "";
         vm.adding = false;
+        vm.removing = false;
 
         // "Public" functions
         vm.addItem = addItem;
@@ -43,10 +44,12 @@
         }
 
         function removeItem(itemToRemove) {
-            // Check where the item to remove is located in the array.
-            var ind = vm.list.indexOf(itemToRemove);
-            // If we have found the item to remove, splice it out.
-            if (ind > -1) vm.list.splice(ind, 1);
+            vm.removing = true;
+            thingListService.removeThing(itemToRemove).then(function () {
+                return refreshList();
+            }).then(function () {
+                vm.removing = false;
+            });
         }
 
         // "Private" function definitions
