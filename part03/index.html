@@ -86,9 +86,11 @@
   // $http.get returns a promise - when this promise resolves, we want to
   // unwrap the data from the response and return that to anything waiting
   // on this.
-  return $http.get("/api/thinglist").then(function (response) {
-    return response.data;
-  });
+  return $http.get("/api/thinglist").then(
+    function (response) {
+      return response.data;
+    }
+  );
 }</pre>
 
           <p>This basic function has touched on an important concept - a "promise" - so before we continue,
@@ -96,79 +98,168 @@
 
           <h3>A quick word on "Promises"</h3>
 
-          <p>In Javascript, there is only a single thread of execution, therefore anything which might take 
-            some time to complete (such as an HTTP call to a server) can't simply wait around, as that would 
-            lead to the web browser freezing until the call is complete. Therefore, in such circumstances, 
-            callback functions are used - to be executed when an asynchronous action completes.</p>
+          <p>In Javascript there is only a <strong>single thread of execution</strong>, therefore anything 
+            which takes time to complete (such as HTTP calls to a server) can't simply wait, as the web
+            browser would freeze until it returns. In such circumstances callback functions are used, 
+            which provide code to be executed when an asynchronous action completes.</p>
             
-          <p>A "promise", such as that returned by $http.get, returns an object which has a function 
-            <strong>.then(fulfilledCallback, [rejectedCallback])</strong> on it - into this function, you can
-            pass one or two callback functions - and the "promise" ensures that one of these (and only one)
-            will be called exactly once at some point in future - called "resolving" the promise.</p>
+          <p>"Promises" are a way of structuring callbacks in a way that allows the code to be written
+            sequentially, chaining callbacks together one after another, instead of nesting callbacks inside
+            each other which quickly becomes unmanagable. It also provides a standard way that calling code
+            can access the final result of an asynchronous operation.</p>
             
-            <p>The fulfilledCallback will be executed should the call complete successfully, and passed the result
-            of the operation, and the rejectedCallback (if specified) will be executed should the call fail, 
-            and is passed an error describing the failure.</p> 
+          <p>A promise returns an object which has a function <strong>.then(fulfilledCallback, [rejectedCallback])</strong> 
+            on it - into this function, you can pass one or two callback functions - and the "promise" ensures 
+            that one of these (and only one) will be called exactly once at some point in future - called 
+            "resolving" the promise.</p>
+            
+          <p>The fulfilledCallback will be executed should the promise complete successfully, and will be passed 
+            the result of the operation. The rejectedCallback (if specified) will be executed should the promise
+            fail (this can be for technical errors such as a timeout or functional failures such as validation
+            problems), and is passed a "reason" describing the failure (which will often be a Javascript
+            Error instance of some kind).</p> 
             
           <p>The .then() function itself returns another promise, allowing .thens to be chained together 
             one after another, to create a logical sequence of asynchronous operations.</p>
             
-          <p>In a fulfilledCallback or rejectedCallback, you can return a value or another promise. If you 
-            return a value, any further ".then" callbacks which have been chained onto this one will be 
-            immediately fullfilled with the value you have returned. If you return another 
-            promise, that will itself be waited upon, and once that resolves, any further ".then" callbacks 
-            which have been chained onto this one will be fulfilled (or rejected) with the 
-            result of that promise.</p>
+          <p>Within a fulfilledCallback or rejectedCallback, you can return a value <strong>or another 
+            promise</strong>. If you return a value, any further ".then" callback which has been chained on 
+            will be immediately fulfilled with the value you have returned. If you return another 
+            promise, that will itself be waited upon, and once that resolves, any further ".then" callback 
+            which has been chained on will be fulfilled (or rejected) with the result of that promise.</p>
             
-          <p>To give a quick example to show the power of this, here's an example showing multiple HTTP 
-            calls being chained together (note this is probably not the best way to implement this particular
-            sequence of actions, it's just to show how promises work):</p>
+          <p>To show the power of this, here's an admittedly unrealistic example showing multiple HTTP 
+            calls being chained together, each using the response of the last:</p>
             
-          <pre>var promise = $http.get("/api/refdata").then(function (refDataResponse) {
-  // For some reason, we're interested in the first horse returned, so
-  // we return another promise here which will resolve with data about
-  // that horse.
-  return $http.get("/api/horses/" + refDataResponse.data.horses[0].id);              
-}).then(function (horseDataResponse) {
-  // Now we've got the data for that first horse, let's create a race
-  // with his name included, and return a promise for creating that 
-  // race.
-  return $http.post("/api/races", 
-    { "horseName": horseDataResponse.data.name });
-}).then(function (raceCreatedResponse) {
-  // This will be resolved once the race has been created, so let's 
-  // return the response to the POST to anyone waiting on this whole
-  // promise chain to complete.
-  return raceCreatedResponse.data;
-}, function (err) {
-  // Errors bubble up along the promise chain, until they find a then 
-  // which has a failureHandler specified - therefore ANY error thrown 
-  // by ANY of the above asynchronous actions will find its way here.
-  // If this doesn't throw an error itself, anything chained onto the 
-  // end of this will be resolved *successfully*, so you need to 
-  // re-throw or fully deal with the error here.
-  console.log("Failed doing our horsey thing - " + err.message);
-  // Re-throw the error.
-  throw err;
-});
+          <pre>function doOurHorseyThing() {
+  var promise = $http.get("/api/refdata").then(
+    function (refDataResponse) {
+      // For some reason, we're interested in the first horse returned, 
+      // so we return another promise here which will resolve with data 
+      // about that horse.
+      var ourHorse = refDataResponse.data.horses[0];
+      console.log("We've found a horse with ID " + ourHorse.id);
+      return $http.get("/api/horses/" + ourHorse.id);              
+    }
+  ).then(
+    function (horseDataResponse) {
+      // Now we've got the data for that first horse, let's create a
+      // race with his name included, and return a promise for creating
+      // that race.
+      var horseName = horseDataResponse.data.name;
+      console.log("We've loaded the horses info and found its name is "
+        + horseName);
+      return $http.post("/api/races", { "horseName": horseName });
+    }
+  ).then(
+    function (raceCreatedResponse) {
+      // This will be resolved once the race has been created, so let's 
+      // return the response to the POST to anyone waiting on this whole
+      // promise chain to complete.
+      console.log("We've successfully made our race!")
+      return raceCreatedResponse.data;
+    }, 
+    function (err) {
+      // Errors bubble along the promise chain until they find a then
+      // with a failureHandler specified - therefore ANY 
+      // error thrown by ANY of the above asynchronous actions will 
+      // find its way here. If this doesn't throw an error itself, 
+      // anything chained onto the end of this will be resolved 
+      // *successfully*, so you need to re-throw or fully deal with 
+      // the error here.
+      console.log("Failed doing our horsey thing - " + err.message);
+      // Re-throw the error.
+      throw err;
+    }
+  );
+  
+  // **********
+  // NOTE: The next line will be executed BEFORE ANY of the callbacks
+  // specified inside the .thens above! Remember it's all asynchronous
+  // inside the .then()'s.
+  // **********
+  console.log("Request sent!");
+  
+  // Return the promise, so whoever called this can get access to the 
+  // result of these promises once they finish resolving, or add its
+  // own chain of .thens on and keep the party going!
+  return promise;
+}</pre>
 
-// **********
-// NOTE: The next line will be executed BEFORE ANY of the callbacks
-// specified inside the .thens above! Remember it's all asynchronous
-// inside the .then()'s.
-// **********
-console.log("Request sent!");
+          <p>Notice how, irrespective of how many actions we're chaining up, we're not getting
+            any further "nested" as we go on - just adding .thens on to the end repeatedly. In 
+            real-world usage, you're unlikely to chain them all together like this in one place, 
+            more likely you'll have one or two chained together then return that promise to
+            somewhere else, where you might add another "then" on the end, and so on! By using
+            promises everywhere, buildling up sequences of asynchronous operations becomes 
+            <em>relatively</em> straightforward.</p>
 
-// Return the promise, so whoever called this can get access to the 
-// result of these promises once they finish resolving.
-return promise;
-</pre>
+          <p>To compare, if you were using "standard" callback nesting, that same code would
+            look like this - note how we're getting further and further nested as we go on 
+            (and just imagine if we added a couple more actions to the end of this!). Also
+            note how we're having to provide multiple error handlers for the different levels 
+            of nesting:</p>
+            
+          <em>For the purposes of the below, assume $http.get and $http.post take success and
+            failure callbacks as parameters; this <strong>is not the case</strong> so this code 
+            would not actually work.</em>
+
+          <pre>function doOurHorseyThing(callbackWhenFinished, callbackIfFailed) {
+  $http.get("/api/refdata", 
+    function (refDataResponse) {
+      // For some reason, we're interested in the first horse returned, 
+      // so load the data about that horse.
+      var ourHorse = refDataResponse.data.horses[0];
+      console.log("We've found a horse with ID " + ourHorse.id);
+      $http.get("/api/horses/" + ourHorse.id, 
+        function (horseDataResponse) {
+          // Now we've got the data for that first horse, let's create a
+          // race with his name included
+          var horseName = horseDataResponse.data.name;
+          console.log("We've loaded the horses info and found his name is "
+            + horseName);
+          $http.post("/api/races", { "horseName": horseName }, 
+            function (raceCreatedResponse) {
+              // This will be called once the race has been created, so let's 
+              // call the callback we were passed with the response for 
+              // creating the race.
+              console.log("We've successfully made our race!")
+              callbackWhenFinished(raceCreatedResponse.data);
+            },
+            function (raceCreatedError) {
+              // Do any specific error handling, or simply
+              // call the failure callback.
+              callbackIfFailed(raceCreatedError);
+            }
+          );
+        },
+        function (horseDataError) {
+          // Do any specific error handling, or simply
+          // call the failure callback.
+          callbackIfFailed(horseDataError);
+        }
+      );              
+    }, 
+    function (refDataError) {
+      // Do any specific error handling, or simply
+      // call the failure callback.
+      callbackIfFailed(refDataError);
+    }
+  );
+
+  // **********
+  // NOTE: The next line will be executed BEFORE ANY of the callbacks
+  // specified above! Remember it's all asynchronous inside the
+  // callbacks.
+  // **********
+  console.log("Request sent!");
+}</pre>
 
           <p>We'll be using promises while creating our services, so you can play with them
             more as we go - they can be confusing at first but once you get your head around
             them, they become second nature... nearly! :)</p>
             
-          <p>The "promise" is documented as the <a href="https://promisesaplus.com/" target="_blank">Promises A+ 
+          <p>The "promise" is documented as the <a href="https://promisesaplus.com/" target="_blank">Promises/A+ 
           open standard</a>, and promises will become a native part of Javascript in future versions
           of the language.</p>
             
