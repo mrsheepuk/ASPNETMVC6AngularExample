@@ -62,8 +62,11 @@
     // Here, we define the basic URL used to reach all endpoints
     // inside this class - [controller] represents the name of the
     // classbefore the word Controller, so in this case:
-    // "api/ThingList" is our base URL.
+    // "api/ThingList" is our base URL. We're also specifying 
+    // that, by default, nothing from this controller should be 
+    // cached by the browser.
     [Route("api/[controller]")]
+    [ResponseCache(NoStore=true)]
     public class ThingListController : Controller
     {
         // If an HTTP GET comes in to api/ThingList, this method will

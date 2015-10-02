@@ -174,9 +174,12 @@
   );
   
   // **********
-  // NOTE: The next line will be executed BEFORE ANY of the callbacks
-  // specified inside the .thens above! Remember it's all asynchronous
-  // inside the .then()'s.
+  // NOTE: The next line *IS GUARANTEED* to be executed BEFORE ANY of 
+  // the callbacks specified inside the .thens above! Remember it's 
+  // all asynchronous inside the .then()'s, and the Promise spec 
+  // REQUIRES that, even if the promise is already resolved, callbacks
+  // passed to .then() are not executed until the current execution 
+  // stack completes.
   // **********
   console.log("Request sent!");
   
@@ -248,9 +251,10 @@
   );
 
   // **********
-  // NOTE: The next line will be executed BEFORE ANY of the callbacks
-  // specified above! Remember it's all asynchronous inside the
-  // callbacks.
+  // NOTE: The next line will *LIKELY* be executed BEFORE ANY of
+  // the callbacks specified above! Remember it's all asynchronous
+  // inside the callbacks. However, unlike in the promise case, 
+  // this is not 100% guaranteed.
   // **********
   console.log("Request sent!");
 }</pre>
@@ -259,9 +263,12 @@
             more as we go - they can be confusing at first but once you get your head around
             them, they become second nature... nearly! :)</p>
             
-          <p>The promise is documented as the <a href="https://promisesaplus.com/" target="_blank">Promises/A+ 
-          open standard</a>, and they will become a native part of Javascript in future versions
-          of the language.</p>
+          <p>The promise is documented in the fabulously brief <a href="https://promisesaplus.com/" target="_blank">Promises/A+ 
+            open standard</a>, and they will become a native part of Javascript in future versions
+            of the language. You can read more about the guaranteed order of execution of then callbacks
+            on the great pair of answers to
+            <a href="http://stackoverflow.com/questions/31225687/why-promise-resolve-then-is-delayed">this
+            StackOverflow question</a></p>
             
           <p>Now, back to our new service...</p>
 
@@ -273,7 +280,147 @@
             service by a string, which must equal that used when we registered our service
             with the module), and as a parameter to the top-level controller function.</p>
             
-          <p>TBC</p>
+          <pre>Home.$inject = ["thingListService"];
+
+function Home(thingListService) {
+...</pre>
+
+          <h3>Using the service to load our list of things</h3>
+          
+          <p>Now, we'll create a private function for refreshing our list from the service. In the 
+            "Private" function definitions section of the controller, add something like the 
+            following:</p>
+            
+          <pre>function refreshList() {
+  // Return a promise, so we can use this to do things once the 
+  // refresh has completed.
+  return thingListService.getThings().then(
+    function(things) {
+      // Clear the array (setting an array's length to zero is
+      // the simplest way to do this in javascript)
+      vm.list.length = 0;
+      
+      // Add all returned items to our array.
+      for (var x =0; x < things.length; x++)
+        vm.list.push(things[x]);
+    }
+  );            
+}</pre>              
+
+          <p>Interesting things to note in this function:</p>
+          
+          <ul>
+            <li>We're returning a promise - so we can easily wait for the refresh to complete when
+              we use this function.</li>
+            <li>We're updating our existing vm.list array, rather than replacing it with the value
+              from the thingListService - <strong>this is important</strong>, because the ng-repeat 
+              directive we're using in the template watches the collection that it is bound to when
+              the page is loaded - if we overwrite vm.list with a new value instead of editing the 
+              existing array, ng-repeat would simply continue watching the old (now de-referenced) 
+              array, and not show our items.</li>
+          </ul>
+          
+          <p>Before we try this out, we need to call our new refreshList function when initialising
+            the controller - so add a call to refreshList() in the Initialisation section of your 
+            controller, then run it up!</p>
+            
+          <p>As we're using a static variable, each time you restart the web application, the list
+            will be cleared, so use Postman again to add an item, then refresh your page in the 
+            web browser, and you should see your item loaded into the list!</p>
+            
+          <h3>Adding items to the list</h3>
+          <p>Using Postman isn't a very user-friendly way for our users to add things to the list,
+            so let's update our addItem implementation to send the item to the server. To do this,
+            we need to add an addThing function to the service, which will do a POST and handle
+            the response:</p>
+            
+          <pre>function addThing(thing) {
+  return $http.post("/api/thinglist", { "Value": thing }).then(
+    function (response) {
+      return response.data;
+    }
+  );
+}</pre>
+
+          <p>Here we're using $http.post instead of $http.get - it's very similar, but takes a 
+            second parameter of the data to send as the body of the request. We're constructing 
+            an object there that the server should be able to convert an instance of our Thing
+            model that we created in part 2.</p>
+            
+          <p>Remembering to add addThing to the service = {} section, we then head back to our
+            controller. In the controller, we already have a addItem function, so we'll update
+            that to use our service instead of updating the array locally:</p>
+            
+          <pre>function addItem() {
+    // We don't want to add empty entries - we will change this to
+    // show an error later.
+    if (vm.newItem.length == 0) return;
+
+    // Use the thingListService to submit our new item
+    vm.adding = true;
+    thingListService.addThing(vm.newItem).then(
+      function (response) {
+        // We've added it, so clear the textbox.
+        vm.newItem = "";
+        // Refresh the list.
+        return refreshList();
+      }
+    ).then(
+      function () {
+        // The list has been refreshed now and we've finished
+        // adding our item.
+        vm.adding = false;
+      }
+    );
+}</pre>
+
+          <p>Note that we've added a new property - vm.adding - which you should add to your
+            "Public" properties section and default to false.</p>
+
+          <p>Interesting things to note here:</p>
+          
+          <ul>
+            <li>We're setting a boolean flag - vm.adding - to true while the add and
+              subsequent refresh of the list is happening. We'll use that in our template to
+              display an "Adding..." message and hide the Add link.</li>
+            <li>We're re-using our refreshList function - and waiting on it to complete via the
+              then() function, so we can re-set our flag to false once everything is 
+              complete.</li>
+          </ul>
+
+          <p>Let's make a couple of small updates to our template to use our new "adding" property:</p>
+          
+          <pre>&lt;a href=&quot;#&quot; ng-hide=&quot;home.adding&quot; 
+    ng-click=&quot;home.addItem()&quot;&gt;Add!&lt;/a&gt; 
+    &lt;span ng-show=&quot;home.adding&quot;&gt;Adding...&lt;/span&gt;</pre>
+
+          <p>Give it all a go! Now you should be able to add items to your list, and each time you
+            submit an item, the "Add" link should temporarily be disabled, and the list should be
+            refreshed to show your new item.</p>
+            
+          <p>To prove it is working against the server, after adding a couple of items, refresh your
+            page - it should reload the current list from the server, so you should see whatever you've
+            added.</p>
+
+          <h3>Removing items from the list</h3>
+          
+          <p>As a final exercise in this section:</p>
+          
+          <ol>
+            <li>Update your new service to have a function to ask the server to remove an item from 
+              the list (remember, the name of the item being deleted should go in the URL to the
+              server, to match the way we set our route up in the Web API).</li>
+            <li>Update the removeItem function in your controller to use this instead of locally updating the
+            array.</li>
+            <li>Hide the "remove" links in your template while the remove is happening.</li>
+          </ol>
+          
+          <p>Don't forget you'll need to refresh your list after removing an item.</p>
+            
+          <p>You can check your solution against the branch
+            <a href="https://github.com/mrsheepuk/ASPNETMVC6AngularExample/tree/Part03Final">Part03Final</a>
+            which shows a final working solution for all the steps discussed in this part of the 
+            tutorial.</p>
 
         </section>
 
