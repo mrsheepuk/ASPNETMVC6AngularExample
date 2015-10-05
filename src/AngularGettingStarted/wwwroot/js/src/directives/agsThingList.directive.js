@@ -41,8 +41,9 @@
     function agsThingListController() {
         var vm = this;
         // "Public" properties
-        vm.list = [];
-        vm.removing = false;
+        // Added by directive scope:
+        // vm.list
+        // vm.removing
 
         // "Public" functions
 
