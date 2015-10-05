@@ -98,6 +98,8 @@
             // controller below.
             bindToController: true
         }
+        
+        return directive;
 
         function link(scope, el, attr, ctrl) {
         }
@@ -196,7 +198,66 @@
 
           <p>This basic directive should be ready now, so in our home.html template, replace our existing 
             list with <code>&lt;ags-thing-list things="home.list"&gt;&lt;/ags-thing-list&gt;</code> and
-            run it up.</p>
+            run it up. Add a couple of items, and you should see them appearing!</p>
+
+          <h3>Removing items from our list</h3>
+          
+          <p>With our previous version, we could remove items from our list. How should that be implemented
+            in a directive? We need to expose a callback attribute on our scope, which uses the &amp; prefix:</p>
+            
+          <pre>scope: {
+  list: "=things",
+  removeItem: "&onRemoveItem"
+}</pre>
+
+          <p>Update our home.html template to bind a function call to this as follows, noting how the attribute
+            name is converted from onRemoveItem to on-remove-item:</p>
+            
+          <pre>&lt;ags-thing-list things="home.list" 
+            on-remove-item=&quot;home.removeItem(item)&quot;&gt;&lt;/ags-thing-list&gt;</pre>
+            
+          <p>And we need to update our directive template to call this new removeItem handler when a remove link is clicked:</p>
+            
+          <pre>&lt;ul&gt;
+  &lt;li ng-repeat=&quot;item in agsThingList.list&quot;&gt;
+    {{item}} 
+    (&lt;a href=&quot;#&quot; ng-click=&quot;agsThingList.removeItem({item: item})&quot;&gt;
+      remove
+    &lt;/a&gt;)
+  &lt;/li&gt;
+&lt;/ul&gt;</pre>
+
+          <p>Note the syntax for specifying the parameters to the callback - we're actually passing 
+            an object into the callback <code>{item: item}</code> which is translated to the named 
+            parameter "item".</p>
+            
+          <p>Run this up, and it should all be working. So far, this has been more work than doing the
+            list locally in the page template, however if we had multiple places where we were 
+            showing lists with remove functionality, we could now re-use this directive in each
+            of those places. And because we've not strongly bound our directive to a particular set
+            of operations against the server, we could use this list anywhere we have an array 
+            of items, and bind it to any removal functionality which is appropriate.</p>
+            
+          <p>It's easy enough to pull functionality out into directives later, so it's OK to err on 
+            the side of leaving things in local templates until you know you're going to want to 
+            re-use them. With the caveat that directives are the only place you should do any
+            HTML / DOM manipulation, so if you need that, directives are the way to go.</p>
+
+          <h3>Exercise: Add in a "removing" parameter to the directive</h3>
+          
+          <p>In our previous version, we used a "removing" property on the controller to disable the
+            remove links while we removed an item. Try to add such a property to the new directive and
+            pass its value through from our home controller, and use it to hide the remove links as 
+            per our previous version.</p>
+            
+          <p>Tip: If you're struggling to see if it's working because the remove is happening too
+            quickly, you can hack a "Thread.Sleep(1000)" into your WebAPI delete handler to make it 
+            take a bit longer to remove the item.</p>
+            
+          <p>You can check your solution against the branch
+            <a href="https://github.com/mrsheepuk/ASPNETMVC6AngularExample/tree/Part04Final">Part04Final</a>
+            which shows a final working solution for all the steps discussed in this part of the 
+            tutorial.</p>
 
         </section>
 
