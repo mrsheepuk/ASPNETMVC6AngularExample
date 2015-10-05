@@ -6,7 +6,7 @@
     function agsThingList() {
         var directive = {
             link: link,
-            templateUrl: "",
+            templateUrl: "js/src/directives/agsThingList.html",
             restrict: "EA",
             controller: agsThingListController,
             controllerAs: "agsThingList"
