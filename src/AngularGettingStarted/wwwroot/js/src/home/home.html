@@ -1,8 +1,6 @@
 ﻿<p>Hello! Welcome to Angular!</p>
 
-<ul>
-    <li ng-repeat="item in home.list">{{item}} <span ng-hide="home.removing">(<a href="#" ng-click="home.removeItem(item)">remove</a>)</span></li>
-</ul>
+<ags-thing-list things="home.list"></ags-thing-list>
 
 <input type="text" ng-model="home.newItem" />
 <a href="#" ng-hide="home.adding" ng-click="home.addItem()">Add!</a> <span ng-show="home.adding">Adding...</span>

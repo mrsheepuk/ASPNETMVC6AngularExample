@@ -12,10 +12,11 @@
             templateUrl: "js/src/directives/agsThingList.html",
             // Define the inputs/outputs of this directive:
             scope: {
+                list: "=things"
             },
             // Restrict where this directive can be used - E=element, 
             // A=attribute, EA=either.
-            restrict: "EA",
+            restrict: "E",
             // Define a controller for this directive.
             controller: agsThingListController,
             // Define the alias for the controller for use in the 
@@ -25,6 +26,8 @@
             // controller below.
             bindToController: true
         }
+
+        return directive;
 
         function link(scope, el, attr, ctrl) {
         }
@@ -36,6 +39,7 @@
     function agsThingListController() {
         var vm = this;
         // "Public" properties
+        vm.list = [];
 
         // "Public" functions
 
