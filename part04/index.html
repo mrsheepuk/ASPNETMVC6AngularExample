@@ -183,11 +183,13 @@
           
           <p>This means that take the attribute "things" from the calling template, and put it into our local
             scope as "list". Create a property "vm.list" in the public properties of the directive controller, 
-            too, just to keep everything consistent. There's a shortcut if you want the local name to be the
-            same as the attribute name - <code>list: "="</code> would mean the attribute would be called 
-            list. We'd then call our directive like so:</p>
+            too, just to keep everything consistent. We'd then call our directive like so:</p>
             
           <pre>&lt;ags-thing-list things="home.list"&gt;&lt;/ags-thing-list&gt;</pre>
+            
+          <p>There's a shortcut for defining the scope if you want the local name to be the same as the 
+            attribute name - <code>list: "="</code> would mean the attribute and controller property would 
+            both be called list.</p>
             
           <p>Now, let's add our template definition in - replace any HTML in agsThingList.html with something
             like this - note we're using the controllerAs alias to reference the data we're interested in:</p>
@@ -240,7 +242,7 @@
             
           <p>It's easy enough to pull functionality out into directives later, so it's OK to err on 
             the side of leaving things in local templates until you know you're going to want to 
-            re-use them. With the caveat that directives are the only place you should do any
+            re-use them - with the caveat that directives are the only place you should do any
             HTML / DOM manipulation, so if you need that, directives are the way to go.</p>
 
           <h3>Exercise: Add in a "removing" parameter to the directive</h3>
