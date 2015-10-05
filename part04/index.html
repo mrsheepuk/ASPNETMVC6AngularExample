@@ -42,7 +42,161 @@
           
           <p>We've decided that we might need to show lists of things all over the place 
             in our application, and the easiest way of doing that is to create a custom
-            directive. Let's dive right in - create a... TBC!!!</p>
+            directive. Let's dive right in - create a folder named directives, and in it,
+            create two new files - a javascript file named agsThingList.directive.js, and
+            an HTML file named agsThingList.html.</p>
+            
+          <h3>Directive Naming</h3>
+          <p>Why have we named this agsThingList? For a directive, when you use it in your
+            templates, you will call it as an element or attribute which will have a name
+            derived from your name, for example agsThingList would be referenced as:</p>
+            
+           <pre>&lt;ags-thing-list&gt;&lt;/ags-thing-list&gt;</pre>
+           
+           <p>... or ...</p>
+
+           <pre>&lt;div ags-thing-list=""&gt;&lt;/div&gt;</pre>
+           
+           <p>Note the camelCase is replaced with hyphens. But why ags? There is a 
+             single common namespace for directives, so for this tutorial, I've picked
+             ags (AngularGettingStarted) as a prefix for the local directives we're 
+             creating. This makes sure we don't clash with any pre-existing directives 
+             (for example, the in-built Angular directives all start ng-). You can 
+             choose any prefix you like, or none at all, but for clean code it makes a 
+             lot of sense to choose one and use it for all your directives in a
+             particular project.</p>
+             
+           <h3>Implementing the directive</h3>
+             
+           <p>In your agsThingList.directive.js, pop in this boilerplate, then we'll go
+             through what the various parts mean:</p>
+             
+           <pre>(function () {
+    'use strict';
+    // Registers this directive with the Angular module "app"
+    angular.module('app').directive('agsThingList', agsThingList);
+
+    function agsThingList() {
+        var directive = {
+            // The link function is where we do any manipulation of the
+            // HTML:
+            link: link,
+            // Define the template:
+            templateUrl: "js/src/directives/agsThingList.html",
+            // Define the inputs/outputs of this directive:
+            scope: {
+            },
+            // Restrict where this directive can be used - E=element, 
+            // A=attribute, EA=either.
+            restrict: "EA",
+            // Define a controller for this directive.
+            controller: agsThingListController,
+            // Define the alias for the controller for use in the 
+            // template
+            controllerAs: "agsThingList",
+            // Ensure our input/output scope above is tied to our 
+            // controller below.
+            bindToController: true
+        }
+
+        function link(scope, el, attr, ctrl) {
+        }
+    }
+
+    // Inject any services and data this controller depends on.
+    agsThingListController.$inject = [];
+
+    function agsThingListController() {
+        var vm = this;
+        // "Public" properties
+
+        // "Public" functions
+
+        // "Private" properties
+
+        // Initialisation
+
+        // "Public" function definitions
+
+        // "Private" function definitions
+
+        // Event Subscriptions
+    }
+})();</pre>
+
+          <p>The important part of defining the directive comes at the top of this, so let's quickly
+            talk through the key parts of that definition:</p>
+            
+          <dl>
+            <dt>link</dt>
+            <dd>The link function is run when the directive has data bound to it when it is
+              created. It is in here that any DOM manipulation (i.e. adding/altering the HTML)
+              should be done.</dd>
+              
+            <dt>scope</dt>
+            <dd>This defines what the inputs and outputs of this directive are. If used as an
+              element, any attributes added to the element are available here, and can be bound
+              in different ways. We'll use some examples of this later in this section.</dd>
+            
+            <dt>restrict</dt>
+            <dd>This controls how a directive can be included by other templates - E means it 
+              should use the "element" syntax (e.g. <code>&lt;ags-thing-list&gt;&lt;/ags-thing-list&gt;</code>)
+              and A means it should use the "attribute" syntax (e.g. <code>&lt;div ags-thing-list=""&gt;&lt;/div&gt;</code>). 
+              EA means either is fine.</dd>
+               
+            <dt>controller</dt>
+            <dd>Much like the regular page we created previously, a directive has a controller 
+              too. Whether code should go in the link or controller can be somewhat confusing for
+              a directives, it <em>can</em> often go in either. Remember that the link should
+              be doing any DOM manipulation, and the controller should be dealing with the 
+              "external" API of the directive. There's many shades of grey here...</dd>
+              
+            <dt>controllerAs</dt>
+            <dd>With our regular page, we defined the controller alias in-line in a single "Yyy as yyy" line, 
+              on a directive it is separated into two, but has the same meaning - this is the alias we'll
+              use in our template to refer to our controller.</dd>
+              
+            <dt>bindToController</dt>
+            <dd>This tells Angular that we want our inputs/outputs (as defined by the scope argument) 
+              to be bound to the controller we've specified (e.g. if we have a scope property named "title",
+              this will be bound to vm.title inside our controller).</dd>
+              
+          </dl>
+
+          <p>After the definition, we have our link and controller functions - note that we've got the normal
+            $inject syntax for adding in any dependencies to our controller - but also remember that in a 
+            directive, <strong>we shouldn't really be loading any data from servers or similar</strong>, data 
+            should be provided to our directive by the calling template/controller pair. So, for example, you're
+            unlikely to be adding a dependency on our thingListService here.</p>
+
+          <h3>Adding in some scope</h3>
+          
+          <p>We're trying to make a directive to show our list of things, so let's update our directive to
+            have a scope property for the list of things to show. In the agsThingList.directive.js, update
+            the "scope" property:</p>
+            
+          <pre>scope: {
+  list: "=things"
+}</pre>
+          
+          <p>This means that take the attribute "things" from the calling template, and put it into our local
+            scope as "list". Create a property "vm.list" in the public properties of the directive controller, 
+            too, just to keep everything consistent. There's a shortcut if you want the local name to be the
+            same as the attribute name - <code>list: "="</code> would mean the attribute would be called 
+            list. We'd then call our directive like so:</p>
+            
+          <pre>&lt;ags-thing-list things="home.list"&gt;&lt;/ags-thing-list&gt;</pre>
+            
+          <p>Now, let's add our template definition in - replace any HTML in agsThingList.html with something
+            like this - note we're using the controllerAs alias to reference the data we're interested in:</p>
+            
+          <pre>&lt;ul&gt;
+  &lt;li ng-repeat=&quot;item in agsThingList.list&quot;&gt;{{item}}&lt;/li&gt;
+&lt;/ul&gt;</pre>
+
+          <p>This basic directive should be ready now, so in our home.html template, replace our existing 
+            list with <code>&lt;ags-thing-list things="home.list"&gt;&lt;/ags-thing-list&gt;</code> and
+            run it up.</p>
 
         </section>
 
