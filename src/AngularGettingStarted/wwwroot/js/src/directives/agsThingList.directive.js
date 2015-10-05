@@ -12,7 +12,8 @@
             templateUrl: "js/src/directives/agsThingList.html",
             // Define the inputs/outputs of this directive:
             scope: {
-                list: "=things"
+                list: "=things",
+                removeItem: "&onRemoveItem"
             },
             // Restrict where this directive can be used - E=element, 
             // A=attribute, EA=either.
