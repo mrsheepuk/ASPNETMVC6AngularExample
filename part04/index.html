@@ -182,8 +182,10 @@
 }</pre>
           
           <p>This means that take the attribute "things" from the calling template, and put it into our local
-            scope as "list". Create a property "vm.list" in the public properties of the directive controller, 
-            too, just to keep everything consistent. We'd then call our directive like so:</p>
+            scope as "list". This creates a property "vm.list" on the directive controller, but <strong>do not
+            be tempted to add one to the controller yourself!</strong> If you add one yourself, it might work 
+            initially, but you get odd problems if the data is updated outside the directive. We'll then call
+            our directive like so:</p>
             
           <pre>&lt;ags-thing-list things="home.list"&gt;&lt;/ags-thing-list&gt;</pre>
             
