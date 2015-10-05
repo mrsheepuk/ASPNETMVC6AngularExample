@@ -5,20 +5,32 @@
 
     function agsThingList() {
         var directive = {
+            // The link function is where we do any manipulation of the
+            // HTML:
             link: link,
+            // Define the template:
             templateUrl: "js/src/directives/agsThingList.html",
+            // Define the inputs/outputs of this directive:
+            scope: {
+            },
+            // Restrict where this directive can be used - E=element, 
+            // A=attribute, EA=either.
             restrict: "EA",
+            // Define a controller for this directive.
             controller: agsThingListController,
-            controllerAs: "agsThingList"
+            // Define the alias for the controller for use in the 
+            // template
+            controllerAs: "agsThingList",
+            // Ensure our input/output scope above is tied to our 
+            // controller below.
+            bindToController: true
         }
 
         function link(scope, el, attr, ctrl) {
-
         }
     }
 
-    // Inject the services and data this controller depends on - this is how we wire 
-    // services to controllers.
+    // Inject any services and data this controller depends on.
     agsThingListController.$inject = [];
 
     function agsThingListController() {
