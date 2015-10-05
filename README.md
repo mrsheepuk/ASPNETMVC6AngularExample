@@ -1,4 +1,4 @@
-# ASP.NET vNext / MVC6 Angular Tutorial
+# ASP.NET 5 / MVC6 Angular Tutorial
 This is a basic ASP.NET 5 MVC6 Angular tutorial using easy gulp tooling. The empty project has the following features:
 
 1. Gulp to handle minification, combination, and injection of the JS and CSS into the view.
