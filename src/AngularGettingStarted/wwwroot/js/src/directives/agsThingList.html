@@ -1,3 +1,8 @@
 ﻿<ul>
-    <li ng-repeat="item in agsThingList.list">{{item}} (<a href="#" ng-click="agsThingList.removeItem({item: item})">remove</a>)</li>
+    <li ng-repeat="item in agsThingList.list">
+        {{item}} 
+        <span ng-hide="agsThingList.removing">
+            (<a href="#" ng-click="agsThingList.removeItem({item: item})">remove</a>)
+        </span>    
+    </li>
 </ul>

@@ -1,6 +1,6 @@
 ﻿<p>Hello! Welcome to Angular!</p>
 
-<ags-thing-list things="home.list" on-remove-item="home.removeItem(item)"></ags-thing-list>
+<ags-thing-list things="home.list" on-remove-item="home.removeItem(item)" removing="home.removing"></ags-thing-list>
 
 <input type="text" ng-model="home.newItem" />
 <a href="#" ng-hide="home.adding" ng-click="home.addItem()">Add!</a> <span ng-show="home.adding">Adding...</span>

@@ -13,6 +13,7 @@
             // Define the inputs/outputs of this directive:
             scope: {
                 list: "=things",
+                removing: "=removing",
                 removeItem: "&onRemoveItem"
             },
             // Restrict where this directive can be used - E=element, 
@@ -41,6 +42,7 @@
         var vm = this;
         // "Public" properties
         vm.list = [];
+        vm.removing = false;
 
         // "Public" functions
 
