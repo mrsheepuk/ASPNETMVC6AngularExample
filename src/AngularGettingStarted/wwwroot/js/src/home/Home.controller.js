@@ -5,14 +5,14 @@
 
     // Inject the services and data this controller depends on - this is how we wire 
     // services to controllers.
-    Home.$inject = ["thingListService"];
+    Home.$inject = ["thingListService", "thingList"];
 
     // Define the controller - the parameters passed into this function will be 
     // auto-provided by angular based on the $inject line above.
-    function Home(thingListService) {
+    function Home(thingListService, thingList) {
         var vm = this;
         // "Public" properties
-        vm.list = [];
+        vm.list = thingList;
         vm.newItem = "";
         vm.adding = false;
         vm.removing = false;
@@ -24,7 +24,7 @@
         // "Private" properties
 
         // Initialisation
-        refreshList();
+        //refreshList();
 
         // "Public" function definitions
         function addItem() {

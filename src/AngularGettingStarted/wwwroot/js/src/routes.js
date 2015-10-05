@@ -13,7 +13,12 @@
         $stateProvider.state('home', {
             url: '/',                             // URL to match
             templateUrl: 'js/src/home/home.html', // Template to use
-            controller: 'Home as home'            // Controller ("Home") and its alias for referencing it inside the template ("home") 
+            controller: 'Home as home',           // Controller ("Home") and its alias for referencing it inside the template ("home") 
+            resolve: {
+                thingList: ["thingListService", function (thingListService) {
+                    return thingListService.getThings();
+                }]
+            }
         });
 
         $urlRouterProvider.otherwise('/');
