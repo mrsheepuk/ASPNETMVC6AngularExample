@@ -21,6 +21,20 @@
             }
         });
 
+        $stateProvider.state('detail', {
+            url: '/things/:thing',
+            templateUrl: 'js/src/thingdetail/thingdetail.html',
+            controller: 'ThingDetail as thingDetail',
+            resolve: {
+                thing: ["thingListService", "$stateParams", function (thingListService, $stateParams) {
+                    // The injected "$stateParams" gets its parameters from 
+                    // the URL defined above.
+                    return thingListService.getThing($stateParams.thing);
+                }]
+            }
+        });
+
+
         $urlRouterProvider.otherwise('/');
 
         $locationProvider.html5Mode(true);

@@ -1,6 +1,6 @@
 ﻿<ul>
     <li ng-repeat="item in agsThingList.list">
-        {{item}} 
+        <a ng-href="/things/{{item}}">{{item}}</a>
         <span ng-hide="agsThingList.removing">
             (<a href="#" ng-click="agsThingList.removeItem({item: item})">remove</a>)
         </span>    
