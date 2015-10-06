@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="../stylesheets/github-dark.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="../stylesheets/print.css" media="print">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Part 5 - ASP.NET MVC6 Angular Tutorial by mrsheepuk</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>ASP.NET MVC6 Angular Tutorial</h1>
+          <h2>Basic ASP.NET 5 MVC6 Angular tutorial with easy gulp tooling.</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/mrsheepuk/ASPNETMVC6AngularExample" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>Part 5: Resolving, routing, and multiple pages</h1>
+
+          <p>This continues on from the work done in <a href="../part04/">part 4</a>,
+            if you haven't completed that, it's best to head over there. Alternatively,
+            you can switch to the branch "Part04Final" (Team Explorer - Branches - right
+            click "Part04Final" inside remotes/origin and select "New local branch from..."
+            and give it a local name, tick Checkout branch and untick Track remote branch)
+            to use our version of part 4.</p>
+
+          <h2>Resolving data before loading a page</h2>
+          
+          <p>In our home page controller, the first thing we do is load our list of items
+            from the server. This is simple, but where you have data that is a pre-requisite 
+            for showing a page, it's not the best way to do things. The page router has 
+            "resolving" functionality that allows data to be loaded as a pre-requisite for 
+            displaying a particular page, then passed in as a dependency much like a service. 
+            Let's convert our thingList home page to resolve the current list of things 
+            instead of loading it after page load.</p>  
+            
+          <p>Open up the routes.js file, and update the route we specified earlier as 
+            follows:</p>
+            
+          <pre>$stateProvider.state('home', {
+    url: '/',                             
+    templateUrl: 'js/src/home/home.html', 
+    controller: 'Home as home',           
+    resolve: {
+        thingList: ['thingListService', function(thingListService) {
+            return thingListService.getThings();
+        }]
+    }     
+});</pre>
+
+          <p>There's a few things going on here. The "resolve" property defines a set of
+            items which must be resolved before the page is displayed. In this case, we've
+            defined a single item, <code>thingList</code>. The value of the item can be
+            one of three things - a hard-coded value, e.g. <code>thingList: null</code>,
+            a function that returns a value directly, e.g. <code>thingList: function() { return "horse"; }</code>,
+            or a function that returns a promise, which will be resolved before the page
+            is displayed - as per the example above.</p>
+            
+          <p>The other thing to note here is the "inline dependency" syntax. This is
+            an equivalent to the $inject property we've used elsewhere - the dependencies
+            are listed in the array as per $inject, but the final item of the array is the 
+            function that uses the dependencies.</p>
+            
+          <p>Now we've updated the route, let's update our controller to use the data 
+            supplied to it. In Home.controller.js, you'll need to add "thingList" to the
+            $inject line, and to the parameters to the function. Then, simply set 
+            <code>vm.list = thingList;</code> and remove the call to refreshList() in the 
+            initialisation section - so it should all look something like this:</p>
+            
+          <pre>Home.$inject = ["thingListService", "thingList"];
+function Home(thingListService, thingList) {
+    var vm = this;
+    // "Public" properties
+    vm.list = thingList;
+    ...
+    // Initialisation
+    // refreshList(); -- no longer required, we're resolving it before
+    //                   we display the view.    
+    ...</pre>
+    
+          <p>Run it up, add a couple of items then refresh the page - you should see the 
+            items in the list when refreshing - and you should not see the page load
+            without the items present (with the previous version, you may have noticed a 
+            slight lag between the page loading and the list being populated).</p>
+            
+          <h2>Multiple pages!</h2>
+          
+          <p>So far, we've only created a single page in our application. Let's add a 
+            second page to display some details! This will give us the
+            opportunity to try out a few of the things we've covered so far, and to
+            cover a couple of new areas too.</p>
+            
+          <h3>Update the WebAPI</h3>
+          <p>We've decided that we want to store a more complex representation of our 
+            Things than the current Web API allows, so the first job is to update our
+            Web API. Let's start by updating the Thing model class to add in a bit of
+            detail about that thing:</p>
+            
+          <pre>public class Thing
+{
+    public string Value { get; set; }
+    public string Detail { get; set; }
+}</pre>
+
+                      
+          <p>We also need to update our ThingListController to store these in a static dictionary of
+            Thing objects, instead of a list of strings, and update our endpoints. It
+            should look something like the below, noting the following key changes:</p>
+            
+          <ul>
+            <li><strong>Returning IActionResult</strong> - instead of plain objects, we're now returning
+            IActionResults from most of our methods. This allows us to return HTTP status codes as well 
+            as plain objects (wrapped in <code>new ObjectResult()</code>) - take a look to see how 
+            we're doing both of those.</li>
+            <li><strong>Get collection</strong> - our basic <code>Get()</code> method for the entire collection is
+            now returning the collection of Keys from our dictionary, rather than the previous string
+            list.</li>
+            <li><strong>Get detail</strong> - we've added a second <code>Get(string thing)</code> method which takes a URL 
+            including an identifier of a specific thing and returns the full representation of that
+            single thing.</li>
+            <li><strong>Put action</strong> - an HTTP PUT means "replace the representation at this 
+            URL with what I've supplied in the body of this request" - i.e. update an existing
+            item. This completes our basic set of HTTP actions - <code>GET</code> retrieves (either a collection 
+            /api/thinglist or a specific item /api/thinglist/sheep), <code>POST</code> creates (always to the
+            collection address /api/thinglist), <code>PUT</code> updates (always to a specific item /api/thinglist/sheep) and 
+            <code>DELETE</code> deletes (also to a specific item /api/thinglist/sheep).</li>
+          </ul>
+            
+          <pre>private static Dictionary&lt;string, Thing&gt; s_thingDetails 
+    = new Dictionary&lt;string, Thing&gt;();
+
+// Get the IDs of all things
+[HttpGet]
+public IEnumerable&lt;string&gt; Get()
+{
+    return s_thingDetails.Keys;
+}
+
+// Create a new thing
+[HttpPost]
+public IActionResult Post([FromBody]Thing thing)
+{
+    // If this thing already exists, return a 409 Conflict.
+    if (s_thingDetails.ContainsKey(thing.Value))
+    {
+        return new HttpStatusCodeResult((int)HttpStatusCode.Conflict);
+    }
+    s_thingDetails[thing.Value] = thing;
+    // Just return an empty OK to say we've done what was asked.
+    return new HttpOkResult();
+}
+
+// Get the full detail of an existing thing.
+[HttpGet("{thing}")]
+public IActionResult Get(string thing)
+{
+    // If we don't know about thing, return a not found.
+    if (!s_thingDetails.ContainsKey(thing)) return HttpNotFound();
+    // Return the full object.
+    return new ObjectResult(s_thingDetails[thing]);
+}
+
+// Update an existing thing.
+[HttpPut("{thing}")]
+public IActionResult Put(string thing, 
+    [FromBody] Thing thingWithDetail)
+{
+    // If we don't know about thing, return a not found.
+    if (!s_thingDetails.ContainsKey(thing)) return HttpNotFound();
+    
+    // Update the details using the thing we've had sent in.
+    s_thingDetails[thing] = thingWithDetail;
+
+    // Return a representation of what we've updated.
+    return new ObjectResult(s_thingDetails[thing]);
+}
+
+// Delete an existing thing.
+[HttpDelete("{thing}")]
+public IActionResult Delete(string thing)
+{
+    // If we don't know about thing, return a not found.
+    if (!s_thingDetails.ContainsKey(thing)) return HttpNotFound();
+
+    s_thingDetails.Remove(thing);
+
+    // Just return an empty OK to say we've done what was asked.
+    return new HttpOkResult();
+}</pre>
+
+          <p>For reference, here is the HTTP endpoints that this API now provides:</p>
+          
+          <table>
+            <tr>
+              <th style="width: 30%; font-weight: bold;">URL</th>
+              <th style="width: 20%; font-weight: bold;">Verb</th>
+              <th style="width: 50%; font-weight: bold;">Meaning</th>
+            </tr>
+            <tr>
+              <td><code>/api/thinglist</code></td>
+              <td>GET</td>
+              <td class="left">
+                Return the names of things in our list<br/>
+                Returns:<br/>
+                HTTP 200 OK, body e.g. <code>["Thing1", "Thing2"]</code> 
+              </td>
+            </tr>
+            <tr>
+              <td><code>/api/thinglist</code></td>
+              <td>POST</td>
+              <td class="left">Add a thing to the list.<br/>
+                  Request body: <code>{ "Value": "Sheep", "Detail": "Sheep's detail!" }</code><br/>
+                  Returns:<br/>
+                  HTTP 409 Conflict if value (e.g. "Sheep" in this case) already exists
+                  HTTP 200 OK if fine, no body.<br/>
+               </td>
+            </tr>
+            <tr>
+               <td><code>/api/thinglist/{thing}</code></td>
+               <td>GET</td>
+               <td class="left">
+                 Returns detail of {thing}.<br/>
+                 Returns:<br/>
+                 HTTP 404 Not Found if {thing} doesn't exist.<br/>
+                 HTTP 200 OK, body e.g.: <code>{ "Value": "Sheep", 
+                  Detail: "Sheep's detail!" }</code></td>
+            </tr>
+            <tr>
+               <td><code>/api/thinglist/{thing}</code></td>
+               <td>PUT</td>
+               <td class="left">
+                 Updates detailed representation of {thing}.<br/>
+                 Request body: <code>{ "Value": "Sheep", "Detail": "Sheep's detail!" }</code><br/>
+                 Returns:<br/>
+                 HTTP 404 Not Found if {thing} doesn't exist.<br/>
+                 HTTP 200 OK if updated OK, body e.g. <code>{ "Value": "Sheep", 
+                  "Detail": "Sheep's detail!" }</code>
+              </td>
+            </tr>
+            <tr>
+              <td><code>/api/thinglist/{thing}</code></td>
+              <td>DELETE</td>
+              <td class="left">
+                Remove a particular thing from the list<br/>
+                Returns:<br/>
+                 HTTP 404 Not Found if {thing} doesn't exist.<br/>
+                 HTTP 200 OK if removed OK, no body.
+              </td>
+            </tr>
+          </table>
+ 
+          <p>At this point, our API is ready. Try it out from Postman to check that it works as expected.</p>
+
+          <p>Let's quickly update our thingList.serivce.js service to cover this updated API - this should all look
+            fairly familiar, the only major changes are that we're now doing some error handling for the specific HTTP
+            status codes that we have decided to return from our Web API, and we've added in our first use of the 
+            <code>$http.put()</code> function:</p>
+          
+          <pre>var service = {
+    getThings: getThings,
+    addThing: addThing,
+    getThing: getThing,
+    updateThing: updateThing,
+    removeThing: removeThing
+};
+
+// Return the interface.
+return service;
+
+// Define the functions referenced by the service interface
+// above here:
+function getThings() {
+    return $http.get("/api/thinglist").then(function (response) {
+        return response.data;
+    });
+}
+
+function addThing(thing) {
+    return $http.post("/api/thinglist", { "Value": thing }).then(
+        function (response) {
+            return response.data;
+        },
+        function (errResponse) {
+            if (errReponse.status === 409) {
+                throw new Error("AlreadyExists");
+            } else {
+                // Re-throw for default handling.
+                throw errResponse;
+            }
+        }
+    );
+}
+
+function getThing(thing) {
+    return $http.get("/api/thinglist/" + thing).then(
+        function (response) {
+            return response.data;
+        },
+        function (errResponse) {
+            // If this was a not found, simply return null.
+            if (errReponse.status === 404) {
+                return null;
+            } else {
+                // Re-throw for default handling.
+                throw errResponse;
+            }
+        }
+    );
+}
+
+function updateThing(thing, thingWithDetails) {
+    return $http.put("/api/thinglist/" + thing, thingWithDetails).then(
+        function (response) {
+            return response.data;
+        },
+        function (errResponse) {
+            // If this was a not found, throw a specific error.
+            if (errReponse.status === 404) {
+                throw new Error("DoesntExist");
+            } else {
+                // Re-throw for default handling.
+                throw errResponse;
+            }
+        }
+    );
+}
+
+function removeThing(thing) {
+    return $http.delete("/api/thinglist/" + thing).then(
+        function (response) {
+            return response.data;
+        }, 
+        function (errReponse) {
+            // If this was a not found, throw a specific error.
+            if (errReponse.status === 404) {
+                throw new Error("DoesntExist");
+            } else {
+                // Re-throw for default handling.
+                throw errResponse;
+            }
+        }
+    );
+}</pre>
+
+          <p>We're now ready to add our second page.</p>
+          
+          <h3>Adding a second page to our application</h3>
+          
+          <p>We now want to add a page which will show the details of a single thing. It'll have its own controller and template,
+            and the route will resolve the thing in question from our new Get endpoint.</p>
+
+          <p>Let's start by defining the new route in routes.js - this will look fairly similar to the existing
+            route for "home", but will have a parameter in its URL to identify which "thing" we're interested in - this
+            gets appended to the end of the existing state:</p>
+            
+          <pre>$stateProvider.state('home', {
+... 
+}).state('detail', {
+    url: '/things/:thing',
+    templateUrl: 'js/src/thingdetail/thingdetail.html',
+    controller: 'ThingDetail as thingDetail',
+    resolve: {
+        thing: ["thingListService", "$stateParams", 
+            function (thingListService, $stateParams) {
+                // The injected "$stateParams" gets its parameters 
+                // from the URL pattern defined above.
+                return thingListService.getThing(
+                    $stateParams.thing);
+            }
+        ]
+    }
+});</pre>
+
+          <p>This looks very similar to our route for the "home" state, but with two notable differences - 
+            the URL has a parameter within it (identified by <code>:thing</code>) and the resolve
+            function has an additional injection - $stateParams - which has properties on it relating to
+            any parameters specified in the URL - in this case, a .thing property. We use that to
+            load the relevant data from the thingListService.</p>
+            
+          <p><strong>This is an important point to understand</strong>, so we'll work through an example of how
+            this operates.</p>
+            
+          <ol>
+            <li>The user visits <code>http://localhost:12345/things/chicken</code> (by typing it in or by following a link inside the application)</li>
+            <li>The URL will be analysed - Angular will identify our "detail" route as matching, and
+              create a stateParams with <code>$stateParams.thing = "chicken"</code>.</li>
+            <li>The specified resolve will be executed with this stateParams, which calls 
+              <code>thingListService.getThing("chicken")</code>.</li>
+            <li>The service will do an HTTP GET on <code>/api/thinglist/chicken</code>.</li>
+            <li>Once that has all completed, the resolve is complete and the requested detail page will be loaded.</li>
+          </ol> 
+          
+          <p>Now we've got the route, we need to create the controller and template. Create a new folder 
+            in wwwroot/js/src named thingdetail, and put a new controller ThingDetail.controller.js and
+            HTML template thingdetail.html. Put the controller boilerplate structure as per <a href="../part01/">part 1</a>, remembering
+            to change the names to ThingDetail instead of Home.</p>
+            
+          <p>In our new controller, we'll need to inject "thing" to receive the resolved data, and pop 
+            that in a new public property (e.g. vm.thing) - so overall it should look something like 
+            this:</p>
+            
+          <pre>(function () {
+    'use strict';
+    angular.module('app').controller('ThingDetail', ThingDetail);
+
+    ThingDetail.$inject = ["thing"];
+
+    function ThingDetail(thing) {
+        var vm = this;
+        // "Public" properties
+        vm.thing = thing;
+
+        // "Public" functions
+
+        // "Private" properties
+
+        // Initialisation
+
+        // "Public" function definitions
+
+        // "Private" function definitions
+
+        // Event Subscriptions
+    }
+})();</pre>
+
+          <p>In our new thingdetail.html template, let's show the name and detail from the Thing we've
+            been passed - remember to use the alias for the controller that we defined in the route, and
+            that the object passed in to the controller will be structured as per our Thing class
+            on the server-side.</p>
+            
+          <p>Once you've done that, you should end up with something like the below:</p>
+            
+          <pre>&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Name:&lt;/th&gt;
+        &lt;td&gt;{{thingDetail.thing.Value}}&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Detail:&lt;/th&gt;
+        &lt;td&gt;{{thingDetail.thing.Detail}}&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+
+&lt;p&gt;&lt;a href=&quot;/&quot;&gt;Back to Thing List&lt;/a&gt;&lt;/p&gt;</pre>
+
+          <p>I've added a link back to our "home" page at the bottom there, now we should update our
+            thing list to link to these detail pages to complete the navigation around our
+            app. In the agsThingList.html template, update the {{item}} line to wrap it in a link to our new detail page:</p>
+            
+          <pre>&lt;ul&gt;
+    &lt;li ng-repeat="item in agsThingList.list"&gt;
+        &lt;a ng-href="/things/{{item}}"&gt;{{item}}&lt;/a&gt;
+        &lt;span ng-hide="agsThingList.removing"&gt;
+            (&lt;a href="#" ng-click="agsThingList.removeItem({item: item})"&gt;remove&lt;/a&gt;)
+        &lt;/span&gt;    
+    &lt;/li&gt;
+&lt;/ul&gt;</pre>
+
+          <p>Here, we're using <code>ng-href</code> instead of a plain href, this is so Angular can
+            replace {{item}} correctly to form a valid URL.</p>
+            
+          <p>Run this up, add an item or two, and you should be able to click on the item name and 
+            be taken to the detail page, showing the name you've entered on the previous page, and
+            an empty detail. You should also be able to click on the Back to Thing List link and
+            navigate back to our home page. If you look closely, you'll notice that the page isn't
+            loading fully when you click these links - Angular is intercepting the clicks and loading
+            the relevant states of the app internally, without an additional round-trip to the 
+            server - all that is actually being updated is the content inside the &lt;ui-view&gt; tag in
+            Views/Home/Index.cshtml. The address bar URL is being updated as you move around, though, so
+            if the user refreshes the page or sends the URL to a friend, they'll get the right "state" of
+            the app when they load the URL.</p>
+            
+          <h3>Aside: Nested states</h3>
+          <p>It is worth being aware that you can nest states inside each other. In this scenario, a 
+            top-level template would have another &lt;ui-view&gt; inside it, and child states which derive 
+            from that state would put their content there, and so forth. This is very powerful for 
+            building up a modular app.</p>
+            
+          <p>To very quickly try this out, you need only to make a couple of changes to your routes.js 
+            file:</p>
+          <ul>
+            <li>Change the name of your 'detail' state to <code>home.detail</code> - this defines it
+            as a child of home.</li>
+            <li>Remove the leading / from the URL for that state, i.e. it becomes 
+            <code>url: 'things/:thing'</code> - this is because it inherits the URL of its parent, so 
+            you are defining the URL relative to that.</li>
+          </ul>
+          
+          <p>Then you just need to pop &lt;ui-view&gt;&lt;/ui-view&gt; into your home.html template 
+            where you want the detail to be injected (I'd suggest under the Add section). Now, when you 
+            run your app, the detail will be shown on the same page as the list!</p>
+            
+          <p>Undo this or leave it as is for the next section - either will work!</p>
+
+          <h2>Making it editable</h2>
+          <p>Now we've updated our API and created our new form for viewing the details, we should
+            make it editable to use our Put function and allow us to specify details for a thing.
+            To do this, let's start by changing our thingdetail.html to provide editing 
+            functionality:</p>
+            
+          <pre>&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Name:&lt;/th&gt;
+        &lt;td&gt;{{thingDetail.thing.Value}}&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Detail:&lt;/th&gt;
+        &lt;td&gt;
+            &lt;input type="text" ng-model="thingDetail.thing.Detail"/&gt; 
+            &lt;input type="button" ng-click="thingDetail.save()" 
+                value="Save" ng-disabled="thingDetail.saving"/&gt;
+        &lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+
+&lt;p ng-show="thingDetail.errMsg"&gt;{{thingDetail.errMsg}}&lt;/p&gt;
+
+&lt;p&gt;&lt;a href="/"&gt;Back to Thing List&lt;/a&gt;&lt;/p&gt;</pre>
+
+          <p>There shouldn't be anything too surprising there! We've used "ng-disabled", which can disable form
+            elements based on a boolean, to stop Save being clicked while the save is processing. We've also 
+            defined a ng-click handler function - save() - so add that to our ThingDetail controller and make
+            it call our <code>thingListService.updateThing</code> function. You should end up with something like
+            this:</p>
+            
+          <pre>ThingDetail.$inject = ["thing", "thingListService"];
+function ThingDetail(thing, thingListService) {
+  var vm = this;
+  // "Public" properties
+  vm.thing = thing;
+  vm.saving = false;
+  vm.errMsg = null;
+  
+  // "Public" functions
+  vm.save = save;
+  
+  // "Private" properties
+  
+  // Initialisation
+  
+  // "Public" function definitions
+  function save() {
+      vm.saving = true;
+      thingListService.updateThing(vm.thing.Value, vm.thing).then(
+          function (updatedThing) {
+              // In case the server has changed anything, 
+              // update our local thing (e.g. if we had an "updatedTime"
+              // property managed by the server).
+              vm.thing = updatedThing;
+              vm.saving = false;
+          },
+          // Catch any errors and display a message.
+          function (err) {
+              vm.saving = false;
+              vm.errMsg = err.message;
+          }
+      );
+  }
+  ...
+}</pre>
+
+          <p>Note that what we're sending back to the server is <strong>what the server originally
+            sent to us</strong> - vm.thing - which has been updated by being bound to the input
+            in our template. This means that no matter how many properties of this object 
+            we want to edit in our form, our code here and in the service remains identical - the 
+            only work is to add the inputs in our template and bind them to the relevant 
+            properties.</p> 
+
+          <p>We've also included a bit of rudimentary error handling in there too, should the 
+            update fail - nothing flashy at the moment! To see this in operation:</p>
+            
+          <ul>
+            <li>Open your app and add an item</li>
+            <li>Navigate to the details page for that item</li>
+            <li>Open a second tab and go to your home page<li>
+            <li>Remove the item using the (remove) link</li>
+            <li>Go back to the first tab, and attempt to Save the details - you should see a DoesntExist message.</li>
+          </ul>
+          
+          <p>That's the end of this part, so if you're having trouble following any of the above, you
+            can see our complete working solution in the 
+            <a href="https://github.com/mrsheepuk/ASPNETMVC6AngularExample/tree/Part05Final">Part05Final</a>
+            branch.</p>
+            
+           <!--
+
+            <li><strong>Validation</strong> - for the Put request, we're validating the Value supplied
+            in the body is equal to the {thing} supplied in the URL, and returning a 400 Bad Request if
+            this validation is not met.</li>
+
+    // If the thing from the URL is not equal to the Value in the
+    // body, return HTTP 400 Bad Request describing the validation
+    // failure.
+    if (thingWithDetail.Value != thing) return HttpBadRequest(
+        new { Errors = new string[] { "ValueUrlMismatch" } });
+-->
+
+        </section>
+
+        <footer>
+          ASP.NET MVC6 Angular Tutorial is maintained by <a href="https://github.com/mrsheepuk">mrsheepuk</a><br>
+          This page was generated by <a href="https://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+
+      </div>
+    </div>
+  </body>
+</html>

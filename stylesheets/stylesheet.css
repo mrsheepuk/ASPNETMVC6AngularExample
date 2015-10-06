@@ -231,6 +231,9 @@ td {
   text-align: center;
   border: 1px solid #303030;
 }
+td.left {
+  text-align: left;
+}
 
 form {
   padding: 20px;
