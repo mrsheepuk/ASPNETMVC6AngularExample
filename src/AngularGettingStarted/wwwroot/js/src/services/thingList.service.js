@@ -37,7 +37,7 @@
                     return response.data;
                 },
                 function (errResponse) {
-                    if (response.status === 409) {
+                    if (errResponse.status === 409) {
                         throw new Error("AlreadyExists");
                     } else {
                         // Re-throw for default handling.
@@ -54,7 +54,7 @@
                 },
                 function (errResponse) {
                     // If this was a not found, simply return null.
-                    if (response.status === 404) {
+                    if (errResponse.status === 404) {
                         return null;
                     } else {
                         // Re-throw for default handling.
@@ -71,7 +71,7 @@
                 },
                 function (errResponse) {
                     // If this was a not found, throw a specific error.
-                    if (response.status === 404) {
+                    if (errResponse.status === 404) {
                         throw new Error("DoesntExist");
                     } else {
                         // Re-throw for default handling.
