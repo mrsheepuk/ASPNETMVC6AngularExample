@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Mvc;
 using AngularGettingStarted.Models;
+using System.Net;
 
 namespace AngularGettingStarted.Controllers
 {
@@ -11,24 +12,62 @@ namespace AngularGettingStarted.Controllers
     [ResponseCache(NoStore = true)]
     public class ThingListController : Controller
     {
-        private static List<string> s_thingList = new List<string>();
+        private static Dictionary<string, Thing> s_thingDetails = new Dictionary<string, Thing>();
 
+        // Get the IDs of all things
         [HttpGet]
-        public List<string> Get()
+        public IEnumerable<string> Get()
         {
-            return s_thingList;
+            return s_thingDetails.Keys;
         }
 
+        // Create a new thing
         [HttpPost]
-        public void Post([FromBody]Thing thing)
+        public IActionResult Post([FromBody]Thing thing)
         {
-            s_thingList.Add(thing.Value);
+            // If this thing already exists, return a 409 Conflict.
+            if (s_thingDetails.ContainsKey(thing.Value))
+            {
+                return new HttpStatusCodeResult((int)HttpStatusCode.Conflict);
+            }
+            s_thingDetails[thing.Value] = thing;
+            // Just return an empty OK to say we've done what was asked.
+            return new HttpOkResult();
         }
 
-        [HttpDelete("{thing}")]
-        public void Delete(string thing)
+        // Get the full detail of an existing thing.
+        [HttpGet("{thing}")]
+        public IActionResult Get(string thing)
         {
-            s_thingList.Remove(thing);
+            // If we don't know about thing, return a not found.
+            if (!s_thingDetails.ContainsKey(thing)) return HttpNotFound();
+            // Return the full object.
+            return new ObjectResult(s_thingDetails[thing]);
+        }
+
+        // Update an existing thing.
+        [HttpPut("{thing}")]
+        public IActionResult Put(string thing, [FromBody] Thing thingWithDetail)
+        {
+            // If we don't know about thing, return a HTTP 404 not found.
+            if (!s_thingDetails.ContainsKey(thing)) return HttpNotFound();
+
+            // Update the details using the thing we've had sent in.
+            s_thingDetails[thing] = thingWithDetail;
+
+            // Return a representation of what we've updated.
+            return new ObjectResult(s_thingDetails[thing]);
+        }
+
+        // Delete an existing thing.
+        [HttpDelete("{thing}")]
+        public IActionResult Delete(string thing)
+        {
+            // If we don't know about thing, return a not found.
+            if (!s_thingDetails.ContainsKey(thing)) return HttpNotFound();
+
+            s_thingDetails.Remove(thing);
+            return new HttpOkResult();
         }
     }
 }

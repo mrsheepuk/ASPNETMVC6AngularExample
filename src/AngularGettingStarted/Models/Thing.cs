@@ -8,5 +8,6 @@ namespace AngularGettingStarted.Models
     public class Thing
     {
         public string Value { get; set; }
+        public string Detail { get; set; }
     }
 }
