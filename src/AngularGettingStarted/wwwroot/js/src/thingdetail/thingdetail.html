@@ -5,8 +5,13 @@
     </tr>
     <tr>
         <th>Detail:</th>
-        <td>{{thingDetail.thing.Detail}}</td>
+        <td>
+            <input type="text" ng-model="thingDetail.thing.Detail"/> 
+            <input type="button" ng-click="thingDetail.save()" value="Save" ng-disabled="thingDetail.saving"/>
+        </td>
     </tr>
 </table>
+
+<p ng-show="thingDetail.errMsg">{{thingDetail.errMsg}}</p>
 
 <p><a href="/">Back to Thing List</a></p>
