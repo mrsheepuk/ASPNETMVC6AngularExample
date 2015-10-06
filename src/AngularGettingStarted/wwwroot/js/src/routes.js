@@ -19,9 +19,7 @@
                     return thingListService.getThings();
                 }]
             }
-        });
-
-        $stateProvider.state('detail', {
+        }).state('detail', {
             url: '/things/:thing',
             templateUrl: 'js/src/thingdetail/thingdetail.html',
             controller: 'ThingDetail as thingDetail',
