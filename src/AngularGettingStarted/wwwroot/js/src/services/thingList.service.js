@@ -65,7 +65,7 @@
         }
 
         function updateThing(thing, thingWithDetails) {
-            return $http.put("/api/thinglist" + thing, thingWithDetails).then(
+            return $http.put("/api/thinglist/" + thing, thingWithDetails).then(
                 function (response) {
                     return response.data;
                 },
