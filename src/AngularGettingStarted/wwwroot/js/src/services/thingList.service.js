@@ -48,7 +48,7 @@
         }
 
         function getThing(thing) {
-            return $http.get("/api/thinglist" + thing).then(
+            return $http.get("/api/thinglist/" + thing).then(
                 function (response) {
                     return response.data;
                 },
