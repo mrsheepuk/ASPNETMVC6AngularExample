@@ -1,4 +1,4 @@
-# ASP.NET 5 / MVC6 Angular Tutorial
+# ASP.NET 5 / MVC 6 Angular Tutorial
 
 This is a simple, opinionated, tutorial to show how to create an Angular (v1.5) single page application with an ASP.NET 5 / MVC 6 Web API back end, using Visual Studio 2015 on Windows. There are hundreds of different ways of writing Angular applications, many good, a lot bad. This guide takes you through creating an application using one particular style, based on the guidelines set forth in the excellent [Angular Style Guide by John Papa](https://github.com/johnpapa/angular-styleguide).
 
